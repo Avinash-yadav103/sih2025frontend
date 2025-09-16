@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { useState } from 'react'
 import './App.css'
+import { Box } from '@mui/material';
 
 // Import pages
 import Login from './pages/Login'
@@ -22,6 +22,7 @@ import Reports from './pages/Reports'
 import Settings from './pages/Settings'
 import Audit from './pages/Audit'
 import Layout from './components/Layout'
+import MapWrapper from './pages/Maps/MapWrapper'
 
 // Create theme
 const theme = createTheme({
@@ -39,42 +40,38 @@ const theme = createTheme({
 });
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <Routes>
-          <Route path="/police/login" element={<Login onLogin={handleLogin} />} />
+          {/* Login is still available but not required */}
+          <Route path="/police/login" element={<Login onLogin={() => {}} />} />
           
-          {isAuthenticated ? (
-            <Route element={<Layout />}>
-              <Route path="/police" element={<Navigate to="/police/map" replace />} />
-              <Route path="/police/map" element={<MapView />} />
-              <Route path="/police/alerts" element={<Alerts />} />
-              <Route path="/police/alerts/:alertId" element={<AlertDetail />} />
-              <Route path="/police/tourists" element={<TouristList />} />
-              <Route path="/police/tourists/:touristId" element={<TouristDetail />} />
-              <Route path="/police/incidents" element={<IncidentList />} />
-              <Route path="/police/incidents/:incidentId" element={<IncidentDetail />} />
-              <Route path="/police/dispatch" element={<Dispatch />} />
-              <Route path="/police/units" element={<UnitsList />} />
-              <Route path="/police/geofences" element={<GeofenceManager />} />
-              <Route path="/police/iot" element={<IoTDashboard />} />
-              <Route path="/police/reports" element={<Reports />} />
-              <Route path="/police/settings" element={<Settings />} />
-              <Route path="/police/audit" element={<Audit />} />
-            </Route>
-          ) : (
-            <Route path="/police/*" element={<Navigate to="/police/login" replace />} />
-          )}
+          {/* Fix for /mapi route - use the MapWrapper */}
+          <Route path="/mapi" element={<MapWrapper />} />
           
-          <Route path="*" element={<Navigate to="/police/login" replace />} />
+          {/* All routes are now inside the Layout without authentication check */}
+          <Route element={<Layout />}>
+            <Route path="/police" element={<Navigate to="/police/map" replace />} />
+            <Route path="/police/map" element={<MapView />} />
+            <Route path="/police/alerts" element={<Alerts />} />
+            <Route path="/police/alerts/:alertId" element={<AlertDetail />} />
+            <Route path="/police/tourists" element={<TouristList />} />
+            <Route path="/police/tourists/:touristId" element={<TouristDetail />} />
+            <Route path="/police/incidents" element={<IncidentList />} />
+            <Route path="/police/incidents/:incidentId" element={<IncidentDetail />} />
+            <Route path="/police/dispatch" element={<Dispatch />} />
+            <Route path="/police/units" element={<UnitsList />} />
+            <Route path="/police/geofences" element={<GeofenceManager />} />
+            <Route path="/police/iot" element={<IoTDashboard />} />
+            <Route path="/police/reports" element={<Reports />} />
+            <Route path="/police/settings" element={<Settings />} />
+            <Route path="/police/audit" element={<Audit />} />
+          </Route>
+          
+          {/* Redirect all other paths to the map view */}
+          <Route path="*" element={<Navigate to="/police/map" replace />} />
         </Routes>
       </Router>
     </ThemeProvider>

@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Box, Container, Typography, TextField, Button, Paper, Avatar, Alert } from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { useNavigate } from 'react-router-dom';
 
 const Login = ({ onLogin }) => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -9,7 +12,7 @@ const Login = ({ onLogin }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Simple validation
+    // Simple validation - just check if fields are not empty
     if (!username || !password) {
       setError('Please enter both username and password');
       return;
@@ -17,20 +20,23 @@ const Login = ({ onLogin }) => {
     
     // For demo purposes, accept any login
     onLogin();
+    
+    // Navigate to the dashboard after successful login
+    navigate('/police/map');
   };
 
   return (
     <Container component="main" maxWidth="xs">
       <Paper elevation={6} sx={{ mt: 8, p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-          {/* Add icon when MUI is installed */}
+          <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
           Police Dashboard Login
         </Typography>
         
         {error && (
-          <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
+          <Alert severity="error" sx={{ width: '100%', mt: 2, mb: 1 }}>
             {error}
           </Alert>
         )}
