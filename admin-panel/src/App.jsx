@@ -1,38 +1,57 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import LoginPage from './pages/LoginPage';
+import PoliceLoginPage from './pages/PoliceLoginPage';
 import AdminDashboard from './pages/AdminDashboard';
+import PoliceDashboard from './pages/PoliceDashboard';
 import { isAuthenticated } from './services/authService';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isPoliceLoggedIn, setIsPoliceLoggedIn] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
     setIsLoggedIn(isAuthenticated());
     
+    // Check if police user is logged in
+    setIsPoliceLoggedIn(localStorage.getItem('isPoliceAuthenticated') === 'true');
+    
     // Check URL path to set current page
     const path = window.location.pathname;
     if (path.includes('login')) {
       setCurrentPage('login');
+    } else if (path.includes('police-login')) {
+      setCurrentPage('police-login');
     } else if (path.includes('admin-dashboard')) {
       setCurrentPage('admin-dashboard');
+    } else if (path.includes('police-dashboard')) {
+      setCurrentPage('police-dashboard');
     }
   }, []);
 
   // Handle navigation
   const handleLoginClick = (type) => {
-    setCurrentPage('login');
-    window.history.pushState({}, '', '/login');
+    if (type === 'admin') {
+      setCurrentPage('login');
+      window.history.pushState({}, '', '/login');
+    } else if (type === 'police/auth') {
+      setCurrentPage('police-login');
+      window.history.pushState({}, '', '/police-login');
+    }
   }
 
   // Render the appropriate page based on current state
   const renderPage = () => {
     if (currentPage === 'login') {
       return <LoginPage />;
+    } else if (currentPage === 'police-login') {
+      return <PoliceLoginPage />;
     } else if (currentPage === 'admin-dashboard' || isLoggedIn) {
       return <AdminDashboard />;
+    } else if (currentPage === 'police-dashboard' || isPoliceLoggedIn) {
+      return <PoliceDashboard />;
     }
 
     // Landing page (home) content

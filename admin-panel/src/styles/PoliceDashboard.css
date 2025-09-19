@@ -1,0 +1,216 @@
+/* Police Dashboard Styles */
+.police-dashboard-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Police Header - slightly different color scheme than admin */
+.police-header {
+  background-color: #1a237e; /* Darker blue for police */
+}
+
+/* Reuse most styles from AdminDashboard.css */
+.dashboard-header {
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.dashboard-emblem {
+  width: 40px;
+  height: auto;
+}
+
+.header-logo h1 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-name {
+  font-size: 0.9rem;
+}
+
+.logout-button {
+  background-color: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dashboard Layout */
+.dashboard-content {
+  display: flex;
+  flex-grow: 1;
+}
+
+.dashboard-sidebar {
+  width: 240px;
+  background-color: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
+  padding: 1.5rem 0;
+}
+
+.dashboard-main {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Navigation */
+.dashboard-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-item {
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-left: 4px solid transparent;
+}
+
+.nav-item.active {
+  background-color: #e3f2fd;
+  border-left-color: #1a237e;
+  color: #1a237e;
+  font-weight: 500;
+}
+
+.nav-item:hover:not(.active) {
+  background-color: #f0f0f0;
+}
+
+/* Dashboard Sections */
+.dashboard-section h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.section-description {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+/* Stats Cards */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card h3 {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.stat-value.alert {
+  color: #d32f2f;
+}
+
+/* Recent Activity */
+.recent-activity {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.recent-activity h3 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
+  
+  .dashboard-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.5rem 0;
+  }
+  
+  .dashboard-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0.5rem;
+  }
+  
+  .nav-item {
+    white-space: nowrap;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.5rem 1rem;
+  }
+  
+  .nav-item.active {
+    border-left: none;
+    border-bottom: 3px solid #1a237e;
+  }
+  
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+}
