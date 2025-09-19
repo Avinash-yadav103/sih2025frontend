@@ -1,11 +1,28 @@
-import { Box, Typography, Grid, Paper } from '@mui/material';
+import { Box, Typography, Grid, Paper, Button } from '@mui/material';
 
 const Dashboard = () => {
+  // Handle logout function
+  const handleLogout = () => {
+    // Clear authentication tokens
+    localStorage.removeItem('authToken');
+    // Redirect to login page
+    window.location.href = '/login';
+  };
+
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Police Dashboard
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4">
+          Police Dashboard
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="error" 
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      </Box>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6} lg={4}>
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 240 }}>

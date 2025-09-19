@@ -1105,7 +1105,7 @@ function PoliceDashboard() {
             </div>
             <div className="info-row">
               <div className="info-label">Location:</div>
-              <div className="info-value">{selectedAlert.lat.toFixed(4)}, {selectedAlert.lon.toFixed(4)}</div>
+              <div className="info-value">{alert.lat.toFixed(4)}, {alert.lon.toFixed(4)}</div>
             </div>
             <div className="info-row">
               <div className="info-label">Status:</div>
@@ -1578,7 +1578,9 @@ function PoliceDashboard() {
                     </button>
                   ))}
                 </td>
-                <td>{incident.location ? `${incident.location.lat.toFixed(4)}, ${incident.location.lon.toFixed(4)}` : 'Unknown'}</td>
+                <td>
+                  {incident.location ? `${incident.location.lat.toFixed(4)}, ${incident.location.lon.toFixed(4)}` : 'Unknown'}
+                </td>
                 <td>
                   {incident.assignedUnits ? incident.assignedUnits.join(', ') : 'None'}
                 </td>
@@ -1657,7 +1659,7 @@ function PoliceDashboard() {
                 </div>
                 <div className="info-row">
                   <div className="info-label">Severity:</div>
-                  <div className="info-value severity-{selectedIncident.severity}">
+                  <div className={`info-value severity-${selectedIncident.severity}`}>
                     {Array(selectedIncident.severity).fill('●').join('')}
                   </div>
                 </div>
@@ -1796,7 +1798,6 @@ function PoliceDashboard() {
           <h1>Police Authority Portal</h1>
         </div>
         <div className="header-user">
-          {/* Now we know user exists when this code runs */}
           <span className="user-name">{user.name}</span>
           <button className="logout-button" onClick={handleLogout}>Logout</button>
         </div>
@@ -1806,81 +1807,87 @@ function PoliceDashboard() {
         <aside className="dashboard-sidebar">
           <nav className="dashboard-nav">
             <button 
-              className={activeTab === 'overview' ? 'nav-item active' : 'nav-item'}
-              onClick={() => setActiveTab('overview')}
+              className={activeRoute === 'map' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('map')}
             >
-              Overview
+              <span className="nav-icon">📍</span>
+              <span className="nav-text">Map</span>
             </button>
             <button 
-              className={activeTab === 'tourists' ? 'nav-item active' : 'nav-item'}
-              onClick={() => setActiveTab('tourists')}
+              className={activeRoute === 'alerts' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('alerts')}
             >
-              Verify Tourists
+              <span className="nav-icon">🔔</span>
+              <span className="nav-text">Alerts</span>
             </button>
             <button 
-              className={activeTab === 'emergencies' ? 'nav-item active' : 'nav-item'}
-              onClick={() => setActiveTab('emergencies')}
+              className={activeRoute === 'tourists' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('tourists')}
             >
-              Emergency Reports
+              <span className="nav-icon">👥</span>
+              <span className="nav-text">Tourists</span>
             </button>
             <button 
-              className={activeTab === 'restricted' ? 'nav-item active' : 'nav-item'}
-              onClick={() => setActiveTab('restricted')}
+              className={activeRoute === 'incidents' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('incidents')}
             >
-              Restricted Areas
+              <span className="nav-icon">⚠️</span>
+              <span className="nav-text">Incidents</span>
             </button>
             <button 
-              className={activeTab === 'alerts' ? 'nav-item active' : 'nav-item'}
-              onClick={() => setActiveTab('alerts')}
+              className={activeRoute === 'dispatch' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('dispatch')}
             >
-              Send Alerts
+              <span className="nav-icon">🚚</span>
+              <span className="nav-text">Dispatch</span>
+            </button>
+            <button 
+              className={activeRoute === 'units' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('units')}
+            >
+              <span className="nav-icon">👮</span>
+              <span className="nav-text">Units</span>
+            </button>
+            <button 
+              className={activeRoute === 'geofences' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('geofences')}
+            >
+              <span className="nav-icon">🌐</span>
+              <span className="nav-text">Geofences</span>
+            </button>
+            <button 
+              className={activeRoute === 'iot' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('iot')}
+            >
+              <span className="nav-icon">📱</span>
+              <span className="nav-text">IoT Devices</span>
+            </button>
+            <button 
+              className={activeRoute === 'reports' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('reports')}
+            >
+              <span className="nav-icon">📊</span>
+              <span className="nav-text">Reports</span>
+            </button>
+            <button 
+              className={activeRoute === 'settings' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('settings')}
+            >
+              <span className="nav-icon">⚙️</span>
+              <span className="nav-text">Settings</span>
+            </button>
+            <button 
+              className={activeRoute === 'audit' ? 'nav-item active' : 'nav-item'}
+              onClick={() => navigateTo('audit')}
+            >
+              <span className="nav-icon">🛡️</span>
+              <span className="nav-text">Audit</span>
             </button>
           </nav>
         </aside>
 
         <main className="dashboard-main">
-          {activeTab === 'overview' && (
-            <div className="dashboard-section">
-              <h2>Police Authority Dashboard</h2>
-              <p className="section-description">
-                Welcome to the Police Authority Portal for North Eastern Tourism. 
-                This dashboard helps you verify tourists, manage emergencies, and monitor restricted areas.
-              </p>
-              
-              <div className="stats-cards">
-                <div className="stat-card">
-                  <h3>Pending Verifications</h3>
-                  <div className="stat-value alert">12</div>
-                </div>
-                <div className="stat-card">
-                  <h3>Active Tourists</h3>
-                  <div className="stat-value">247</div>
-                </div>
-                <div className="stat-card">
-                  <h3>Emergency Alerts</h3>
-                  <div className="stat-value alert">3</div>
-                </div>
-                <div className="stat-card">
-                  <h3>Restricted Zone Requests</h3>
-                  <div className="stat-value">8</div>
-                </div>
-              </div>
-              
-              <div className="recent-activity">
-                <h3>Recent Activity</h3>
-                <div className="activity-list">
-                  <p>More dashboard details will be added later...</p>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {activeTab !== 'overview' && (
-            <div className="dashboard-section">
-              <h2>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h2>
-              <p>This section will be implemented according to future requirements.</p>
-            </div>
-          )}
+          {renderContent()}
         </main>
       </div>
     </div>

@@ -5,7 +5,6 @@ import './App.css'
 import { Box } from '@mui/material';
 
 // Import pages
-import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import MapView from './pages/MapView'
 import Alerts from './pages/Alerts'
@@ -23,6 +22,10 @@ import Settings from './pages/Settings'
 import Audit from './pages/Audit'
 import Layout from './components/Layout'
 import MapWrapper from './pages/Maps/MapWrapper'
+import LandingPage from './pages/LandingPage'
+import AdminLogin from './pages/AdminLogin'
+import PoliceLogin from './pages/PoliceLogin'
+import AdminDashboard from './pages/AdminDashboard'
 
 // Create theme
 const theme = createTheme({
@@ -45,8 +48,15 @@ function App() {
       <CssBaseline />
       <Router>
         <Routes>
-          {/* Login is still available but not required */}
-          <Route path="/police/login" element={<Login onLogin={() => {}} />} />
+          {/* Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Login routes */}
+          <Route path="/police/login" element={<PoliceLogin />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          
+          {/* Admin Dashboard */}
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           
           {/* Fix for /mapi route - use the MapWrapper */}
           <Route path="/mapi" element={<MapWrapper />} />
@@ -70,8 +80,8 @@ function App() {
             <Route path="/police/audit" element={<Audit />} />
           </Route>
           
-          {/* Redirect all other paths to the map view */}
-          <Route path="*" element={<Navigate to="/police/map" replace />} />
+          {/* Redirect non-matching paths to landing page instead */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </ThemeProvider>
