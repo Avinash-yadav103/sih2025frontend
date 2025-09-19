@@ -1,0 +1,423 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+    width: 100vw;
+  min-height: 100vh;
+}
+
+.admin-dashboard {
+  display: flex;
+  flex-direction: column;
+
+}
+
+/* Header Styling */
+.gov-header {
+  background-color: #0056a6;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.emblem {
+  width: 60px;
+  height: auto;
+}
+
+.header-titles h1 {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.header-titles h2 {
+  font-size: 1.1rem;
+}
+
+.highlight {
+  color: #7fc243;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.accessibility-btn {
+  background-color: #004080;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.language-selector {
+  padding: 0.3rem;
+  border-radius: 4px;
+  border: none;
+}
+
+.main-nav {
+  background-color: #004080;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 2rem;
+}
+
+.main-nav ul {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+}
+
+.main-nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  position: relative;
+}
+
+.main-nav a:hover::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #f8c300;
+}
+
+.search-box {
+  display: flex;
+}
+
+.search-box input {
+  padding: 0.4rem;
+  border: none;
+  border-radius: 4px 0 0 4px;
+}
+
+.search-box button {
+  background-color: #f8c300;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+}
+
+/* Announcement Banner */
+.announcement-banner {
+  background-color: #f8c300;
+  padding: 0.6rem;
+  overflow: hidden;
+  height: 1rem;
+}
+
+.marquee {
+  white-space: nowrap;
+  animation: marquee 30s linear infinite;
+}
+
+.marquee span {
+  display: inline-block;
+  padding-right: 100%;
+  font-weight: 500;
+}
+
+@keyframes marquee {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-100%, 0); }
+}
+
+/* Main Content */
+.dashboard-content-land {
+  flex-direction: column;
+  padding: 2rem;
+}
+
+/* Login Section */
+.login-section {
+  margin: 2rem 0;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.login-button {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 250px;
+  text-align: center;
+}
+
+.login-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.admin-login {
+  background-color: #0056a6;
+  color: white;
+}
+
+.police-login {
+  background-color: #f8c300;
+  color: #333;
+}
+
+/* Tourism Showcase */
+.tourism-showcase, .schemes-section {
+  margin-top: 2rem;
+}
+
+.section-title {
+  text-align: center;
+  color: #0056a6;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  background-color: #f8c300;
+}
+
+.tourism-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.gallery-item {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover {
+  transform: translateY(-5px);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.gallery-item p {
+  padding: 1rem;
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Government Schemes Section */
+.schemes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.scheme-card {
+  display: flex;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.scheme-card img {
+  width: 200px;
+  height: 150px;
+  object-fit: cover;
+}
+
+.scheme-content {
+  padding: 1.5rem;
+  flex-grow: 1;
+}
+
+.scheme-content h3 {
+  color: #0056a6;
+  margin-bottom: 0.8rem;
+}
+
+.scheme-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #0056a6;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.scheme-link:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+.gov-footer {
+  background-color: #0056a6;
+  color: white;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.footer-section h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.footer-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background-color: #f8c300;
+}
+
+.footer-section ul {
+  list-style: none;
+}
+
+.footer-section li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-section a {
+  color: #e0e0e0;
+  text-decoration: none;
+}
+
+.footer-section a:hover {
+  color: #f8c300;
+  text-decoration: underline;
+}
+
+.copyright {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.9rem;
+}
+
+/* Government website styling */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .main-nav {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .main-nav ul {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .login-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .scheme-card {
+    flex-direction: column;
+  }
+  
+  .scheme-card img {
+    width: 100%;
+  }
+}

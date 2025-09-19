@@ -1,0 +1,506 @@
+/* Admin Dashboard Styles */
+.admin-dashboard-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+  background-color: #004d99;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.dashboard-emblem {
+  width: 40px;
+  height: auto;
+}
+
+.header-logo h1 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-name {
+  font-size: 0.9rem;
+}
+
+.logout-button {
+  background-color: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dashboard Layout */
+.dashboard-content {
+  display: flex;
+  flex-grow: 1;
+}
+
+.dashboard-sidebar {
+  width: 240px;
+  background-color: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
+  padding: 1.5rem 0;
+}
+
+.dashboard-main {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Navigation */
+.dashboard-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-item {
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-left: 4px solid transparent;
+}
+
+.nav-item.active {
+  background-color: #e6f0ff;
+  border-left-color: #004d99;
+  color: #004d99;
+  font-weight: 500;
+}
+
+.nav-item:hover:not(.active) {
+  background-color: #f0f0f0;
+}
+
+/* Dashboard Sections */
+.dashboard-section h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.section-description {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+/* Stats Cards */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card h3 {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.stat-value.alert {
+  color: #d32f2f;
+}
+
+/* Charts */
+.dashboard-charts {
+  margin-top: 2rem;
+}
+
+.chart {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.chart h3 {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.chart-placeholder {
+  height: 300px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+}
+
+/* Tourist Registration Form */
+.tourist-registration {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tourist-registration h3 {
+  color: #004d99;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.form-section h4 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  flex: 1;
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* File Upload & Preview Styling */
+.file-upload {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.file-upload input {
+  display: none;
+}
+
+.file-upload-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.6rem 1rem;
+  color: #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.file-upload-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.file-name {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.file-preview {
+  margin-top: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5rem;
+  background-color: #f9f9f9;
+  max-width: 300px;
+}
+
+.preview-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 3px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.secondary-button {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.primary-button {
+  background-color: #004d99;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background-color: #003b7a;
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Form Progress Indicator */
+.form-progress {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.step-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.progress-step.active .step-number {
+  background-color: #004d99;
+  color: white;
+  border-color: #004d99;
+}
+
+.progress-step.active .step-label {
+  color: #004d99;
+  font-weight: 500;
+}
+
+.progress-step.completed .step-number {
+  background-color: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+.progress-bar {
+  flex-grow: 1;
+  height: 2px;
+  background-color: #ddd;
+  margin: 0 1rem;
+  position: relative;
+  top: -18px;
+}
+
+/* Itinerary Days */
+.itinerary-days {
+  margin-top: 1.5rem;
+}
+
+.itinerary-days h5 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.itinerary-day {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.day-header h6 {
+  font-size: 1rem;
+  margin: 0;
+  color: #333;
+}
+
+.remove-day-btn {
+  background: none;
+  border: none;
+  color: #d32f2f;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+}
+
+.add-day-btn {
+  background-color: #f0f0f0;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  padding: 0.8rem;
+  color: #004d99;
+  font-weight: 500;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.add-day-btn:hover {
+  background-color: #e8f0fe;
+}
+
+/* Form Step Navigation */
+.form-step-container {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* When there's only one button (like in step 1), it should be aligned to the right */
+.form-actions:has(.primary-button:only-child) {
+  justify-content: flex-end;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .form-row {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
+
+  .dashboard-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0;
+  }
+
+  .dashboard-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .nav-item {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .nav-item.active {
+    border-left-color: transparent;
+    border-bottom-color: #004d99;
+  }
+
+  .form-progress {
+    padding: 0.5rem 0;
+  }
+  
+  .step-label {
+    font-size: 0.8rem;
+  }
+}

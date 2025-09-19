@@ -1,6 +1,6 @@
 .leaflet-container {
-  height: 100%;
-  width: 100%;
+  height: 100% !important;
+  width: 100% !important;
   z-index: 1;
 }
 
@@ -11,7 +11,13 @@
   position: relative;
 }
 
-/* Override any potential conflicting styles */
+.map-wrapper {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+/* Fix z-index issues */
 .leaflet-pane {
   z-index: 1;
 }
@@ -42,4 +48,27 @@
 .static-map {
   width: 250px;
   height: 250px;
+}
+
+/* Controls */
+.map-controls {
+  position: absolute;
+  bottom: 35px;
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-box {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.15);
+  padding: 8px;
+  display: flex;
 }

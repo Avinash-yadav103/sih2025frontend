@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box, Paper, Typography, Grid, Tabs, Tab, FormControl, InputLabel, Select, MenuItem, Slider, TextField, Button, IconButton } from '@mui/material';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { 
+  MapContainer, 
+  TileLayer, 
+  Marker, 
+  Popup, 
+  Circle, 
+  ZoomControl, 
+  LayersControl, 
+  ScaleControl, 
+  useMap 
+} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import SearchIcon from '@mui/icons-material/Search';
