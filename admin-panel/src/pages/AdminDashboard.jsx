@@ -10,6 +10,10 @@ function AdminDashboard() {
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState('');
+  
+  // Add popup state
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  
   const [formData, setFormData] = useState({
     // Personal details
     fullName: '',
@@ -41,6 +45,17 @@ function AdminDashboard() {
     // Set user data
     setUser(getCurrentUser());
   }, []);
+
+  // Auto-close popup after 3 seconds
+  useEffect(() => {
+    if (showSuccessPopup) {
+      const timer = setTimeout(() => {
+        setShowSuccessPopup(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessPopup]);
 
   const handleLogout = () => {
     logout();
@@ -194,12 +209,34 @@ function AdminDashboard() {
       setFilePreview('');
       setFormStep(1);
       
-      // Show success message
-      alert('Tourist registered successfully!');
+      // Show success popup instead of alert
+      setShowSuccessPopup(true);
     } catch (error) {
       console.error('Error submitting form:', error);
       alert('Failed to register tourist. Please try again.');
     }
+  };
+
+  // Success Popup Component (inline)
+  const SuccessPopup = () => {
+    if (!showSuccessPopup) return null;
+    
+    return (
+      <div className="inline-popup-overlay">
+        <div className="inline-popup success">
+          <div className="inline-popup-icon">✓</div>
+          <div className="inline-popup-content">
+            <p>Tourist registered successfully!</p>
+          </div>
+          <button 
+            className="inline-popup-close" 
+            onClick={() => setShowSuccessPopup(false)}
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    );
   };
 
   if (!user) {
@@ -208,6 +245,9 @@ function AdminDashboard() {
 
   return (
     <div className="admin-dashboard-page">
+      {/* Inline Popup */}
+      <SuccessPopup />
+      
       <header className="dashboard-header">
         <div className="header-logo">
           <img 
@@ -621,6 +661,9 @@ function AdminDashboard() {
             </div>
           )}
         </main>
+
+
+        
       </div>
     </div>
   );

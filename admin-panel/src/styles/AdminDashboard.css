@@ -504,3 +504,76 @@
     font-size: 0.8rem;
   }
 }
+
+/* Inline Popup Styles */
+.inline-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.inline-popup {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  width: 400px;
+  max-width: 90%;
+  display: flex;
+  position: relative;
+  animation: inlinePopupFade 0.3s ease-in-out;
+}
+
+@keyframes inlinePopupFade {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.inline-popup.success {
+  border-left: 5px solid #4caf50;
+}
+
+.inline-popup-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 15px;
+  font-size: 20px;
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.inline-popup-content {
+  flex-grow: 1;
+}
+
+.inline-popup-content p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.inline-popup-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #999;
+}
+
+.inline-popup-close:hover {
+  color: #333;
+}
