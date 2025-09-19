@@ -9,7 +9,7 @@ import {
   mockUnits, 
   mockGeofences, 
   mockDevices 
-} from '../mockData/policeData';
+} from "../mockData/policeData";
 
 function PoliceDashboard() {
   // Authentication and user state
@@ -1774,6 +1774,16 @@ function PoliceDashboard() {
     );
   };
   
+  // Add this loading state while we wait for user data
+  if (!user) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading police dashboard...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="police-dashboard-page">
       <header className="dashboard-header police-header">
@@ -1786,6 +1796,7 @@ function PoliceDashboard() {
           <h1>Police Authority Portal</h1>
         </div>
         <div className="header-user">
+          {/* Now we know user exists when this code runs */}
           <span className="user-name">{user.name}</span>
           <button className="logout-button" onClick={handleLogout}>Logout</button>
         </div>
