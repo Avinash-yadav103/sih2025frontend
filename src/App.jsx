@@ -3,13 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ThemeProvider from './theme/ThemeProvider';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import MapView from './pages/MapView';
 import Alerts from './pages/Alerts';
-import AlertDetail from './pages/AlertDetail'
 import TouristList from './pages/TouristList';
-import TouristDetail from './pages/TouristDetail'
 import IncidentList from './pages/IncidentList';
-import IncidentDetail from './pages/IncidentDetail'
 import Dispatch from './pages/Dispatch';
 import UnitsList from './pages/UnitsList';
 import GeofenceManager from './pages/GeofenceManager';
@@ -31,28 +29,34 @@ function App() {
       <DatabaseProvider>
         <BrowserRouter>
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/police/login" element={<PoliceLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/" element={<Layout />}>
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="map" element={<MapView />} />
-              <Route path="alerts" element={<Alerts />} />
-              <Route path="alerts/:alertId" element={<AlertDetail />} />
-              <Route path="tourists" element={<TouristList />} />
-              <Route path="tourists/:touristId" element={<TouristDetail />} />
-              <Route path="incidents" element={<IncidentList />} />
-              <Route path="incidents/:incidentId" element={<IncidentDetail />} />
-              <Route path="dispatch" element={<Dispatch />} />
-              <Route path="units" element={<UnitsList />} />
-              <Route path="geofences" element={<GeofenceManager />} />
-              <Route path="iot" element={<IoTDashboard />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="audit" element={<Audit />} />
-              <Route path="*" element={<Navigate to="/dashboard" />} />
+            
+            {/* Admin routes */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            
+            {/* Police routes with Layout */}
+            <Route element={<Layout />}>
+              <Route path="/police/dashboard" element={<Dashboard />} />
+              <Route path="/police/map" element={<MapView />} />
+              <Route path="/police/alerts" element={<Alerts />} />
+              <Route path="/police/tourists" element={<TouristList />} />
+              <Route path="/police/incidents" element={<IncidentList />} />
+              <Route path="/police/dispatch" element={<Dispatch />} />
+              <Route path="/police/units" element={<UnitsList />} />
+              <Route path="/police/geofences" element={<GeofenceManager />} />
+              <Route path="/police/iot" element={<IoTDashboard />} />
+              <Route path="/police/reports" element={<Reports />} />
+              <Route path="/police/settings" element={<Settings />} />
+              <Route path="/police/audit" element={<Audit />} />
             </Route>
+            
+            {/* Redirects */}
+            <Route path="/dashboard" element={<Navigate to="/police/dashboard" />} />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </BrowserRouter>
       </DatabaseProvider>

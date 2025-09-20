@@ -1,79 +1,223 @@
 /* General Layout */
 .layout-container {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Government Top Bar */
+.gov-top-bar {
+  background-color: #F8F8F8;
+  padding: 5px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #E6E6E6;
+}
+
+.gov-top-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gov-top-left {
+  display: flex;
+  align-items: center;
+  color: #333333;
+  font-weight: 500;
+}
+
+.gov-top-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.gov-top-link {
+  color: #0066CC;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.gov-top-link:hover {
+  text-decoration: underline;
+}
+
+.gov-top-actions {
+  display: flex;
+  align-items: center;
+}
+
+.language-button {
+  background-color: transparent;
+  color: #0066CC;
+  border: 1px solid #0066CC;
+  padding: 2px 10px;
+  font-size: 14px;
+  border-radius: 3px;
+  text-decoration: none;
+  margin-left: 8px;
+}
+
+/* Ministry Header */
+.ministry-header {
+  padding: 10px 0;
+  border-bottom: 1px solid #E6E6E6;
   background-color: #FFFFFF;
 }
 
-/* Dashboard Layout */
-.dashboard-layout {
+.ministry-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ministry-branding {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.national-emblem {
+  height: 65px;
+  width: auto;
+  object-fit: contain;
+  display: block !important;
+}
+
+.ministry-title {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100%;
-  overflow: hidden;
-  background-color: #FFFFFF;
+  max-width: 400px; /* Adjust this value as needed */
 }
 
-/* Header */
-.dashboard-header {
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  height: 64px;
-  background-color: #FFFFFF;
-  color: #1F1F1F;
-  box-shadow: 0 1px 0 0 #E6E9EE;
-  z-index: 1000;
-}
-
-.menu-toggle {
-  background: none;
-  border: none;
-  color: #1F1F1F;
-  margin-right: 16px;
-  padding: 8px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.menu-toggle:hover {
-  background-color: #F5F7FA;
-}
-
-.dashboard-header h1 {
+.ministry-title h1, .ministry-title h2 {
   margin: 0;
-  font-size: 20px;
-  font-weight: 500;
-  flex: 1;
-  color: #1F1F1F;
+  font-size: 20px; /* Slightly smaller font to accommodate longer text */
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: normal; /* Allow text to wrap */
 }
 
-/* Dashboard Container */
-.dashboard-container {
+/* Media queries for responsive text */
+@media (max-width: 992px) {
+  .ministry-title h1,
+  .ministry-title h2 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ministry-title h1,
+  .ministry-title h2 {
+    font-size: 16px;
+  }
+  
+  .ministry-title {
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 576px) {
+  .ministry-title h1,
+  .ministry-title h2 {
+    font-size: 14px;
+  }
+  
+  .ministry-title {
+    max-width: 250px;
+  }
+}
+
+.ministry-logos {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.ministry-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* You might need to adjust specific styles for your images */
+.ministry-logo:first-child {
+  height: 45px; /* Adjust for nav2.jpg if needed */
+}
+
+.ministry-logo:last-child {
+  height: 50px; /* Adjust for nav3.png if needed */
+}
+
+/* Main Navigation Bar */
+.main-navbar {
+  background-color: #00497A !important;
+  color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.nav-title {
+  font-weight: 500 !important;
+  font-size: 1.1rem !important;
+}
+
+.nav-menu-button {
+  margin-right: 16px;
+}
+
+.nav-menu-icon {
+  width: 24px;
+  height: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.nav-menu-icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.3s;
+  transform-origin: left center;
+}
+
+/* Hamburger Animation */
+.nav-menu-button.open .nav-menu-icon span:first-child {
+  transform: rotate(45deg);
+}
+
+.nav-menu-button.open .nav-menu-icon span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.nav-menu-button.open .nav-menu-icon span:last-child {
+  transform: rotate(-45deg);
+}
+
+/* Main Content Layout */
+.main-container {
   display: flex;
   flex: 1;
-  overflow: hidden;
   position: relative;
-  background-color: #FFFFFF;
 }
 
 /* Sidebar */
 .sidebar {
   width: 230px;
-  background-color: #FFFFFF;
-  color: #1F1F1F;
+  background-color: white;
   transition: transform 0.3s ease, width 0.3s ease;
-  overflow-y: auto;
-  position: fixed;
+  position: sticky;
   top: 64px;
-  bottom: 0;
-  left: 0;
+  height: calc(100vh - 64px - 121px); /* Adjust for headers height */
+  overflow-y: auto;
+  border-right: 1px solid #E6E6E6;
   z-index: 1000;
-  box-shadow: 1px 0 0 0 #E6E9EE;
 }
 
 .sidebar.closed {
@@ -82,7 +226,7 @@
 }
 
 .sidebar-content {
-  padding-top: 1rem;
+  padding: 10px 0;
 }
 
 .sidebar nav ul {
@@ -100,32 +244,41 @@
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  color: #595959;
+  color: #444444;
   text-decoration: none;
   transition: all 0.2s ease;
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: 500;
 }
 
 .sidebar nav ul li a:hover {
-  background-color: #F5F7FA;
-  color: #3A7AFE;
+  background-color: #F0F7FF;
+  color: #0066CC;
 }
 
 .sidebar nav ul li a.active {
-  background-color: #D8E6FF;
-  color: #3A7AFE;
+  background-color: #E6F0FF;
+  color: #0066CC;
   font-weight: 500;
-  border-left: 3px solid #3A7AFE;
+  border-left: 3px solid #0066CC;
+}
+
+.nav-icon {
+  margin-right: 12px;
+  font-size: 20px !important;
 }
 
 /* Main Content */
 .main-content {
   flex: 1;
   transition: margin-left 0.3s ease;
-  margin-left: 230px;
-  width: calc(100% - 230px);
   background-color: #F5F7FA;
+  min-height: calc(100vh - 64px - 121px); /* Adjust for headers height */
+}
+
+.main-content.sidebar-open {
+  margin-left: 0;
+  width: calc(100% - 230px);
 }
 
 .main-content.sidebar-closed {
@@ -137,56 +290,99 @@
   padding: 24px;
 }
 
-/* Hamburger Button */
-.hamburger-button {
-  margin-right: 16px;
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .ministry-logos {
+    gap: 10px;
+  }
+  
+  .ministry-logo {
+    height: 40px;
+  }
 }
 
-.hamburger-icon {
-  width: 24px;
-  height: 24px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
+@media (max-width: 992px) {
+  .ministry-logos {
+    display: none;
+  }
 }
 
-.hamburger-icon span {
-  display: block;
-  height: 2px;
-  width: 100%;
-  background: #1F1F1F;
-  border-radius: 2px;
-  transition: all 0.3s;
-  transform-origin: left center;
-}
-
-/* Hamburger Animation */
-.hamburger-button.open .hamburger-icon span:first-child {
-  transform: rotate(45deg);
-}
-
-.hamburger-button.open .hamburger-icon span:nth-child(2) {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-
-.hamburger-button.open .hamburger-icon span:last-child {
-  transform: rotate(-45deg);
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
+  .gov-top-link {
+    display: none;
+  }
+  
+  .ministry-branding {
+    gap: 10px;
+  }
+  
+  .national-emblem {
+    height: 50px;
+  }
+  
+  .ministry-title h1,
+  .ministry-title h2 {
+    font-size: 18px;
+  }
+  
   .sidebar {
-    width: 240px;
+    position: fixed;
+    top: 185px; /* Adjust for mobile headers */
+    height: calc(100vh - 185px);
+    width: 250px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    z-index: 1010;
   }
   
   .main-content.sidebar-open {
-    margin-left: 0;
     width: 100%;
   }
+}
+
+@media (max-width: 576px) {
+  .gov-top-left span:first-child,
+  .gov-top-left .MuiDivider-root {
+    display: none;
+  }
   
-  .sidebar.open {
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  .ministry-title h1,
+  .ministry-title h2 {
+    font-size: 16px;
+  }
+  
+  .national-emblem {
+    height: 40px;
+  }
+  
+  .sidebar {
+    top: 165px; /* Adjust for smaller headers */
+  }
+  
+  .page-container {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .ministry-logos {
+    gap: 10px;
+  }
+  
+  .ministry-logo {
+    height: 40px;
+  }
+  
+  .amrit-logo {
+    height: 35px;
+  }
+  
+  .incredible-india-logo {
+    height: 30px;
+  }
+}
+
+@media (max-width: 900px) {
+  .ministry-logos {
+    display: none; /* Hide on smaller screens */
   }
 }

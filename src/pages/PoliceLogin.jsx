@@ -12,7 +12,7 @@ const PoliceLogin = () => {
     // Here you would add authentication logic
     // For now, just simulate a successful login
     localStorage.setItem('authToken', 'police-token');
-    navigate('/police/map');
+    navigate('/police/dashboard'); // Update the redirect path
   };
 
   return (
