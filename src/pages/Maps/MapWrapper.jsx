@@ -10,10 +10,15 @@ import CurrentLocation from './Leaflet/currentLocation'
 
 function MapWrapper() {
   return (
-    <div className="map-container" style={{ height: '100vh', width: '100%' }}>
+    <div className="map-container" style={{ 
+      height: 'calc(100vh - 60px)', 
+      width: '100%', 
+      position: 'relative',
+      overflow: 'hidden' 
+    }}>
       <BasicMap />
     </div>
-  )
+  );
 }
 
 export default MapWrapper

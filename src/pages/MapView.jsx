@@ -1,24 +1,19 @@
-import { useState } from 'react'
-import 'leaflet/dist/leaflet.css'
-import 'leaflet-draw/dist/leaflet.draw.css'
-import './Maps/Leaflet/index.css'
+import React, { useState } from 'react'
+import { Box, Button, IconButton, InputAdornment, TextField, Typography, Chip } from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
+import ZoomInIcon from '@mui/icons-material/ZoomIn'
+import ZoomOutIcon from '@mui/icons-material/ZoomOut'
+import MyLocationIcon from '@mui/icons-material/MyLocation'
+import LayersIcon from '@mui/icons-material/Layers'
+import CloseIcon from '@mui/icons-material/Close'
 import './MapView.css'
 
 // Import Leaflet components
 import BasicMap from './Maps/Leaflet/basic'
 import MarkersMap from './Maps/Leaflet/markers'
 import CurrentLocation from './Maps/Leaflet/currentLocation'
+import GeofenceMap from './Maps/Leaflet/geofences'
 import DrawMap from './Maps/Leaflet/draw'
-import PolygonMap from './Maps/Leaflet/polygon'
-import StaticMap from './Maps/Leaflet/StaticMap'
-import PrintMap from './Maps/Leaflet/Print'
-
-// Import Material UI icons
-import SearchIcon from '@mui/icons-material/Search'
-import AddIcon from '@mui/icons-material/Add'
-import RemoveIcon from '@mui/icons-material/Remove'
-import LayersIcon from '@mui/icons-material/Layers'
-import MyLocationIcon from '@mui/icons-material/MyLocation'
 
 function MapView() {
   const [activeMap, setActiveMap] = useState('markers')
@@ -26,173 +21,173 @@ function MapView() {
   const [selectedMarker, setSelectedMarker] = useState(null)
 
   const renderMap = () => {
-    switch(activeMap) {
-      case 'basic':
-        return <BasicMap onMarkerClick={handleMarkerClick} />
+    switch (activeMap) {
+      case 'standard':
+        return <BasicMap />
       case 'markers':
         return <MarkersMap onMarkerClick={handleMarkerClick} />
       case 'location':
-        return <CurrentLocation onMarkerClick={handleMarkerClick} />
+        return <CurrentLocation />
+      case 'geofences':
+        return <GeofenceMap />
       case 'draw':
-        return <DrawMap onMarkerClick={handleMarkerClick} />
-      case 'polygon':
-        return <PolygonMap onMarkerClick={handleMarkerClick} />
-      case 'static':
-        return <StaticMap onMarkerClick={handleMarkerClick} />
-      case 'print':
-        return <PrintMap onMarkerClick={handleMarkerClick} />
+        return <DrawMap />
       default:
-        return <BasicMap onMarkerClick={handleMarkerClick} />
+        return <MarkersMap onMarkerClick={handleMarkerClick} />
     }
   }
 
   const handleMarkerClick = (marker) => {
-    setSelectedMarker(marker);
+    setSelectedMarker(marker)
   }
 
   const closeInfoCard = () => {
-    setSelectedMarker(null);
+    setSelectedMarker(null)
   }
 
   return (
-    <div className="map-view-container">
-      {/* Full-width map container */}
-      <div className="full-map-container">
-        {renderMap()}
-      </div>
-
-      {/* Google Maps style search bar */}
+    <div className="full-map-container">
+      {/* Search Bar */}
       <div className="search-container">
         <div className="search-bar google-style">
           <SearchIcon className="search-icon" />
-          <input type="text" placeholder="Search tourists, incidents, locations" />
+          <TextField 
+            fullWidth
+            variant="standard"
+            placeholder="Search tourists, incidents, locations"
+            InputProps={{
+              disableUnderline: true,
+            }}
+          />
         </div>
       </div>
 
-      {/* Category buttons like in Google Maps */}
+      {/* Map Type Buttons */}
       <div className="category-buttons google-style">
-        <button 
-          type="button"
-          className={activeMap === 'basic' ? 'active' : ''} 
-          onClick={() => setActiveMap('basic')}
+        <Button 
+          className={activeMap === 'standard' ? 'active' : ''} 
+          onClick={() => setActiveMap('standard')}
         >
           Standard
-        </button>
-        <button 
-          type="button"
+        </Button>
+        <Button 
           className={activeMap === 'markers' ? 'active' : ''} 
           onClick={() => setActiveMap('markers')}
         >
           With Markers
-        </button>
-        <button 
-          type="button"
+        </Button>
+        <Button 
           className={activeMap === 'location' ? 'active' : ''} 
           onClick={() => setActiveMap('location')}
         >
           Current Location
-        </button>
-        <button 
-          type="button"
+        </Button>
+        <Button 
           className={activeMap === 'draw' ? 'active' : ''} 
           onClick={() => setActiveMap('draw')}
         >
           Draw Tools
-        </button>
-        <button 
-          type="button"
-          className={activeMap === 'polygon' ? 'active' : ''} 
-          onClick={() => setActiveMap('polygon')}
+        </Button>
+        <Button 
+          className={activeMap === 'geofences' ? 'active' : ''} 
+          onClick={() => setActiveMap('geofences')}
         >
           Geofence
-        </button>
-        <button 
-          type="button"
-          className={activeMap === 'static' ? 'active' : ''} 
-          onClick={() => setActiveMap('static')}
-        >
-          Static Map
-        </button>
+        </Button>
       </div>
 
-      {/* Filter chips below search bar */}
+      {/* Filter Chips */}
       <div className="filter-chips">
-        <button 
-          className={activeCategory === 'tourists' ? 'active' : ''} 
-          onClick={() => setActiveCategory('tourists')}
+        <Button 
+          className={activeCategory === 'tourists' ? 'active' : ''}
+          onClick={() => setActiveCategory(activeCategory === 'tourists' ? null : 'tourists')}
         >
-          <span className="icon">👤</span>Tourists
-        </button>
-        <button 
-          className={activeCategory === 'incidents' ? 'active' : ''} 
-          onClick={() => setActiveCategory('incidents')}
+          <span className="icon">👤</span> Tourists
+        </Button>
+        <Button 
+          className={activeCategory === 'incidents' ? 'active' : ''}
+          onClick={() => setActiveCategory(activeCategory === 'incidents' ? null : 'incidents')}
         >
-          <span className="icon">🚨</span>Incidents
-        </button>
-        <button 
-          className={activeCategory === 'units' ? 'active' : ''} 
-          onClick={() => setActiveCategory('units')}
+          <span className="icon">🚨</span> Incidents
+        </Button>
+        <Button 
+          className={activeCategory === 'units' ? 'active' : ''}
+          onClick={() => setActiveCategory(activeCategory === 'units' ? null : 'units')}
         >
-          <span className="icon">🚓</span>Units
-        </button>
-        <button 
-          className={activeCategory === 'geofences' ? 'active' : ''} 
-          onClick={() => setActiveCategory('geofences')}
+          <span className="icon">🚔</span> Units
+        </Button>
+        <Button 
+          className={activeCategory === 'geofences' ? 'active' : ''}
+          onClick={() => setActiveCategory(activeCategory === 'geofences' ? null : 'geofences')}
         >
-          <span className="icon">🔷</span>Geofences
-        </button>
-        <button 
-          className={activeCategory === 'iot' ? 'active' : ''} 
-          onClick={() => setActiveCategory('iot')}
+          <span className="icon">🔶</span> Geofences
+        </Button>
+        <Button 
+          className={activeCategory === 'iot' ? 'active' : ''}
+          onClick={() => setActiveCategory(activeCategory === 'iot' ? null : 'iot')}
         >
-          <span className="icon">📡</span>IoT Devices
-        </button>
+          <span className="icon">📱</span> IoT Devices
+        </Button>
       </div>
 
-      {/* Floating map controls - Google Maps style */}
+      {/* Map Controls */}
       <div className="floating-controls">
-        <button className="map-control-button my-location">
-          <MyLocationIcon />
-        </button>
         <div className="map-control-group">
           <button className="map-control-button">
-            <AddIcon />
+            <ZoomInIcon />
           </button>
           <button className="map-control-button">
-            <RemoveIcon />
+            <ZoomOutIcon />
           </button>
         </div>
-        <button className="map-control-button layers">
+        <button className="map-control-button">
+          <MyLocationIcon />
+        </button>
+        <button className="map-control-button">
           <LayersIcon />
         </button>
       </div>
 
-      {/* Information card that appears when marker is clicked */}
+      {/* Render Active Map */}
+      {renderMap()}
+
+      {/* Info Card */}
       {selectedMarker && (
         <div className="info-card">
-          <button className="close-button" onClick={closeInfoCard}>✕</button>
+          <button className="close-button" onClick={closeInfoCard}>
+            <CloseIcon />
+          </button>
           <h3>{selectedMarker.title}</h3>
           <div className="info-content">
             <p className="info-address">{selectedMarker.address}</p>
-            {selectedMarker.type === 'tourist' && (
-              <div className="tourist-details">
-                <p><strong>Status:</strong> {selectedMarker.status}</p>
-                <p><strong>Nationality:</strong> {selectedMarker.nationality}</p>
-                <p><strong>Contact:</strong> {selectedMarker.contact}</p>
-                <p><strong>Last Check-in:</strong> {selectedMarker.lastCheckIn}</p>
-              </div>
-            )}
+            
             {selectedMarker.type === 'incident' && (
-              <div className="incident-details">
-                <p className="incident-severity">{selectedMarker.severity}</p>
-                <p><strong>Reported:</strong> {selectedMarker.reportTime}</p>
-                <p><strong>Description:</strong> {selectedMarker.description}</p>
-              </div>
+              <>
+                <div className={`incident-severity ${selectedMarker.severity.toLowerCase()}`}>
+                  {selectedMarker.severity}
+                </div>
+                <p>Reported: {selectedMarker.reportTime}</p>
+                <p>Description: {selectedMarker.description}</p>
+              </>
             )}
-          </div>
-          <div className="action-buttons">
-            <button className="primary-action">Get Directions</button>
-            <button className="secondary-action">Dispatch Unit</button>
+            
+            {selectedMarker.type === 'tourist' && (
+              <>
+                <p>Status: {selectedMarker.status}</p>
+                <p>Nationality: {selectedMarker.nationality}</p>
+                <p>Contact: {selectedMarker.contact}</p>
+                <p>Last Check-in: {selectedMarker.lastCheckIn}</p>
+              </>
+            )}
+            
+            <div className="action-buttons">
+              <button className="primary-action">
+                Get Directions
+              </button>
+              <button className="secondary-action">
+                {selectedMarker.type === 'incident' ? 'Dispatch Unit' : 'View Details'}
+              </button>
+            </div>
           </div>
         </div>
       )}

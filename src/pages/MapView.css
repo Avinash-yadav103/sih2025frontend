@@ -2,7 +2,7 @@
 .map-view-container {
   position: relative;
   height: 100vh;
-  width: 80vw; 
+  width: 100%; 
   overflow: hidden;
 }
 
@@ -269,7 +269,7 @@
   background-color: #d2e3fc;
 }
 
-/* Full Map Container */
+/* Full Map Container - Made sure it fills the entire container space */
 .full-map-container {
   position: absolute;
   top: 0;
@@ -281,8 +281,8 @@
 
 /* Make sure the Leaflet map takes full height */
 .full-map-container .leaflet-container {
-  height: 100%;
-  width: 100%;
+  height: 100% !important;
+  width: 100% !important;
 }
 
 /* Media queries for responsiveness */
@@ -299,6 +299,11 @@
 /* Override leaflet map styles to look more like Google Maps */
 .leaflet-container {
   font-family: 'Roboto', Arial, sans-serif;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
 .leaflet-control-zoom {
