@@ -15,8 +15,9 @@ import {
   Alert,
   Autocomplete
 } from '@mui/material';
-import { createEFIR } from '../services/eFIRService';
+import { createEFIR } from '../services/eFIRService.js';
 import supabase from '../utils/supabase';
+import { downloadEFIRPdf, openEFIRPdf } from '../utils/pdfGenerator';
 
 const INCIDENT_TYPES = [
   'THEFT',
@@ -150,10 +151,37 @@ const EFIRForm = ({ onSubmitSuccess }) => {
     
     setLoading(true);
     try {
-      const result = await createEFIR({
-        ...formData,
-        is_automatic: false // This is a manually created E-FIR
-      });
+      let efir;
+      
+      if (formData.incident_type === 'MISSING_PERSON') {
+        // Create victim data for missing person
+        const tourist = {
+          id: `temp-${Date.now()}`,
+          name: formData.reporter_details.name,
+          latitude: parseFloat(formData.location.split(',')[0]),
+          longitude: parseFloat(formData.location.split(',')[1]),
+          phone: formData.reporter_details.contact,
+          nationality: formData.reporter_details.relation, // Assuming relation is used as nationality here
+          gender: formData.severity, // Assuming severity is used as gender here
+          age: formData.severity, // Assuming severity is used as age here
+          status: 'missing'
+        };
+        
+        efir = await generateMissingPersonEFIR(tourist, formData.reporter_details.relation);
+      } else {
+        // Create incident data
+        const incident = {
+          title: formData.description,
+          description: formData.description,
+          latitude: parseFloat(formData.location.split(',')[0]),
+          longitude: parseFloat(formData.location.split(',')[1]),
+          severity: formData.severity.toLowerCase(),
+          type: formData.incident_type,
+          timestamp: new Date().toISOString()
+        };
+        
+        efir = await generateIncidentEFIR(incident, formData.reporter_details.relation);
+      }
       
       setNotification({
         open: true,
@@ -178,7 +206,7 @@ const EFIRForm = ({ onSubmitSuccess }) => {
       
       // Notify parent component
       if (onSubmitSuccess) {
-        onSubmitSuccess(result);
+        onSubmitSuccess(efir);
       }
     } catch (error) {
       console.error('Error creating E-FIR:', error);

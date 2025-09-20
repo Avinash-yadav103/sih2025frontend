@@ -39,10 +39,9 @@ import {
 import EFIRForm from '../components/EFIRForm';
 import { 
   getAllEFIRs, 
-  generateEFIRPDF, 
-  shareEFIRViaEmail 
-} from '../services/eFIRService';
-import { runManualCheck } from '../services/backgroundService';
+  generateEFIRPDF 
+} from '../services/eFIRService.js';
+import { runManualCheck } from '../services/backgroundService.js';
 
 // Status color mapping
 const getStatusColor = (status) => {

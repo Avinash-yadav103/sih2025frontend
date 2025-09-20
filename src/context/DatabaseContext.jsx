@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { testConnection } from '../utils/supabase';
+import { supabase, testConnection } from '../utils/supabase.js';
 
 // Create the context
 const DatabaseContext = createContext({

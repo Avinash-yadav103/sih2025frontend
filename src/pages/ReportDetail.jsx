@@ -40,8 +40,8 @@ import {
   getEFIRById, 
   updateEFIRStatus, 
   generateEFIRPDF,
-  shareEFIRViaEmail
-} from '../services/eFIRService';
+  shareEFIRViaEmail 
+} from '../services/eFIRService.js';
 
 // Status color mapping
 const getStatusColor = (status) => {
