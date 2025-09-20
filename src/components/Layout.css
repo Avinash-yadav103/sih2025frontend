@@ -1,0 +1,121 @@
+/* Dashboard Layout */
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 64px;
+  background-color: #1a237e;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  color: white;
+  margin-right: 16px;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Sidebar */
+.dashboard-sidebar {
+  width: 240px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  transition: width 0.3s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.dashboard-sidebar.collapsed {
+  width: 72px;
+}
+
+.dashboard-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  color: #5f6368;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.nav-item:hover {
+  background-color: #f1f3f4;
+}
+
+.nav-item.active {
+  color: #1a73e8;
+  background-color: #e8f0fe;
+  font-weight: 500;
+}
+
+.nav-icon {
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  min-width: 24px;
+}
+
+.dashboard-sidebar.collapsed .nav-label {
+  display: none;
+}
+
+.dashboard-sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.dashboard-sidebar.collapsed .nav-icon {
+  margin-right: 0;
+}
+
+/* Content Area */
+.dashboard-content {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}

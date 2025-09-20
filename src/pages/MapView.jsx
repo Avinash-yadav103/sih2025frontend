@@ -13,34 +13,50 @@ import PolygonMap from './Maps/Leaflet/polygon'
 import StaticMap from './Maps/Leaflet/StaticMap'
 import PrintMap from './Maps/Leaflet/Print'
 
+// Import Material UI icons
+import SearchIcon from '@mui/icons-material/Search'
+import AddIcon from '@mui/icons-material/Add'
+import RemoveIcon from '@mui/icons-material/Remove'
+import LayersIcon from '@mui/icons-material/Layers'
+import MyLocationIcon from '@mui/icons-material/MyLocation'
+
 function MapView() {
   const [activeMap, setActiveMap] = useState('markers')
   const [activeCategory, setActiveCategory] = useState(null)
+  const [selectedMarker, setSelectedMarker] = useState(null)
 
   const renderMap = () => {
     switch(activeMap) {
       case 'basic':
-        return <BasicMap />
+        return <BasicMap onMarkerClick={handleMarkerClick} />
       case 'markers':
-        return <MarkersMap />
+        return <MarkersMap onMarkerClick={handleMarkerClick} />
       case 'location':
-        return <CurrentLocation />
+        return <CurrentLocation onMarkerClick={handleMarkerClick} />
       case 'draw':
-        return <DrawMap />
+        return <DrawMap onMarkerClick={handleMarkerClick} />
       case 'polygon':
-        return <PolygonMap />
+        return <PolygonMap onMarkerClick={handleMarkerClick} />
       case 'static':
-        return <StaticMap />
+        return <StaticMap onMarkerClick={handleMarkerClick} />
       case 'print':
-        return <PrintMap />
+        return <PrintMap onMarkerClick={handleMarkerClick} />
       default:
-        return <BasicMap />
+        return <BasicMap onMarkerClick={handleMarkerClick} />
     }
+  }
+
+  const handleMarkerClick = (marker) => {
+    setSelectedMarker(marker);
+  }
+
+  const closeInfoCard = () => {
+    setSelectedMarker(null);
   }
 
   return (
     <div className="map-view-container">
-      {/* Full-width map container - Moving this up so map is rendered first as background */}
+      {/* Full-width map container */}
       <div className="full-map-container">
         {renderMap()}
       </div>
@@ -48,10 +64,8 @@ function MapView() {
       {/* Google Maps style search bar */}
       <div className="search-container">
         <div className="search-bar google-style">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#5F6368" className="search-icon" viewBox="0 0 16 16">
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-          </svg>
-          <input type="text" placeholder="Search Google Maps" />
+          <SearchIcon className="search-icon" />
+          <input type="text" placeholder="Search tourists, incidents, locations" />
         </div>
       </div>
 
@@ -59,119 +73,129 @@ function MapView() {
       <div className="category-buttons google-style">
         <button 
           type="button"
-          className={activeCategory === 'restaurants' ? 'active' : ''} 
-          onClick={() => setActiveCategory('restaurants')}
+          className={activeMap === 'basic' ? 'active' : ''} 
+          onClick={() => setActiveMap('basic')}
         >
-          <span className="icon">🍽️</span>Restaurants
+          Standard
         </button>
         <button 
           type="button"
-          className={activeCategory === 'hotels' ? 'active' : ''} 
-          onClick={() => setActiveCategory('hotels')}
+          className={activeMap === 'markers' ? 'active' : ''} 
+          onClick={() => setActiveMap('markers')}
         >
-          <span className="icon">🏨</span>Hotels
+          With Markers
         </button>
         <button 
           type="button"
-          className={activeCategory === 'attractions' ? 'active' : ''} 
-          onClick={() => setActiveCategory('attractions')}
+          className={activeMap === 'location' ? 'active' : ''} 
+          onClick={() => setActiveMap('location')}
         >
-          <span className="icon">🎭</span>Things to do
+          Current Location
         </button>
         <button 
           type="button"
-          className={activeCategory === 'museums' ? 'active' : ''} 
-          onClick={() => setActiveCategory('museums')}
+          className={activeMap === 'draw' ? 'active' : ''} 
+          onClick={() => setActiveMap('draw')}
         >
-          <span className="icon">🏛️</span>Museums
+          Draw Tools
         </button>
         <button 
           type="button"
-          className={activeCategory === 'transit' ? 'active' : ''} 
-          onClick={() => setActiveCategory('transit')}
+          className={activeMap === 'polygon' ? 'active' : ''} 
+          onClick={() => setActiveMap('polygon')}
         >
-          <span className="icon">🚇</span>Transit
+          Geofence
         </button>
         <button 
           type="button"
-          className={activeCategory === 'pharmacies' ? 'active' : ''} 
-          onClick={() => setActiveCategory('pharmacies')}
+          className={activeMap === 'static' ? 'active' : ''} 
+          onClick={() => setActiveMap('static')}
         >
-          <span className="icon">💊</span>Pharmacies
+          Static Map
         </button>
       </div>
 
-      {/* Map control buttons */}
-      <div className="map-controls">
-        {/* Map type tabs - Updated to match Google Maps style */}
-        <div className="map-types-tabs">
-          <button 
-            type="button" 
-            className={activeMap === 'basic' ? 'active' : ''} 
-            onClick={() => setActiveMap('basic')}
-          >
-            Standard
-          </button>
-          <button 
-            type="button" 
-            className={activeMap === 'markers' ? 'active' : ''} 
-            onClick={() => setActiveMap('markers')}
-          >
-            With Markers
-          </button>
-          <button 
-            type="button" 
-            className={activeMap === 'location' ? 'active' : ''} 
-            onClick={() => setActiveMap('location')}
-          >
-            Current Location
-          </button>
-          <button 
-            type="button" 
-            className={activeMap === 'draw' ? 'active' : ''} 
-            onClick={() => setActiveMap('draw')}
-          >
-            Draw Tools
-          </button>
-          <button 
-            type="button" 
-            className={activeMap === 'polygon' ? 'active' : ''} 
-            onClick={() => setActiveMap('polygon')}
-          >
-            Geofence
-          </button>
-          <button 
-            type="button" 
-            className={activeMap === 'static' ? 'active' : ''} 
-            onClick={() => setActiveMap('static')}
-          >
-            Static Map
-          </button>
-        </div>
-        
-        {/* Map layers button - Positioned in bottom right like Google Maps */}
-        <div className="map-options google-style">
-          <button type="button" className="map-layers-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Zoom controls - Positioned in bottom right like Google Maps */}
-        <div className="map-zoom-controls">
-          <button type="button" className="zoom-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
-            </svg>
-          </button>
-          <button type="button" className="zoom-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M2 8a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11A.5.5 0 0 1 2 8Z"/>
-            </svg>
-          </button>
-        </div>
+      {/* Filter chips below search bar */}
+      <div className="filter-chips">
+        <button 
+          className={activeCategory === 'tourists' ? 'active' : ''} 
+          onClick={() => setActiveCategory('tourists')}
+        >
+          <span className="icon">👤</span>Tourists
+        </button>
+        <button 
+          className={activeCategory === 'incidents' ? 'active' : ''} 
+          onClick={() => setActiveCategory('incidents')}
+        >
+          <span className="icon">🚨</span>Incidents
+        </button>
+        <button 
+          className={activeCategory === 'units' ? 'active' : ''} 
+          onClick={() => setActiveCategory('units')}
+        >
+          <span className="icon">🚓</span>Units
+        </button>
+        <button 
+          className={activeCategory === 'geofences' ? 'active' : ''} 
+          onClick={() => setActiveCategory('geofences')}
+        >
+          <span className="icon">🔷</span>Geofences
+        </button>
+        <button 
+          className={activeCategory === 'iot' ? 'active' : ''} 
+          onClick={() => setActiveCategory('iot')}
+        >
+          <span className="icon">📡</span>IoT Devices
+        </button>
       </div>
+
+      {/* Floating map controls - Google Maps style */}
+      <div className="floating-controls">
+        <button className="map-control-button my-location">
+          <MyLocationIcon />
+        </button>
+        <div className="map-control-group">
+          <button className="map-control-button">
+            <AddIcon />
+          </button>
+          <button className="map-control-button">
+            <RemoveIcon />
+          </button>
+        </div>
+        <button className="map-control-button layers">
+          <LayersIcon />
+        </button>
+      </div>
+
+      {/* Information card that appears when marker is clicked */}
+      {selectedMarker && (
+        <div className="info-card">
+          <button className="close-button" onClick={closeInfoCard}>✕</button>
+          <h3>{selectedMarker.title}</h3>
+          <div className="info-content">
+            <p className="info-address">{selectedMarker.address}</p>
+            {selectedMarker.type === 'tourist' && (
+              <div className="tourist-details">
+                <p><strong>Status:</strong> {selectedMarker.status}</p>
+                <p><strong>Nationality:</strong> {selectedMarker.nationality}</p>
+                <p><strong>Contact:</strong> {selectedMarker.contact}</p>
+                <p><strong>Last Check-in:</strong> {selectedMarker.lastCheckIn}</p>
+              </div>
+            )}
+            {selectedMarker.type === 'incident' && (
+              <div className="incident-details">
+                <p className="incident-severity">{selectedMarker.severity}</p>
+                <p><strong>Reported:</strong> {selectedMarker.reportTime}</p>
+                <p><strong>Description:</strong> {selectedMarker.description}</p>
+              </div>
+            )}
+          </div>
+          <div className="action-buttons">
+            <button className="primary-action">Get Directions</button>
+            <button className="secondary-action">Dispatch Unit</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
