@@ -4,7 +4,7 @@ const useGeoLocation = () => {
   const [location, setLocation] = useState({
     loaded: false,
     coordinates: { lat: "", lng: "" },
-    error: null
+    error: null,
   });
 
   const onSuccess = (location) => {
@@ -14,15 +14,15 @@ const useGeoLocation = () => {
         lat: location.coords.latitude,
         lng: location.coords.longitude,
       },
-      error: null
+      error: null,
     });
   };
 
-  const onError = error => {
+  const onError = (error) => {
     setLocation({
       loaded: true,
       coordinates: { lat: "", lng: "" },
-      error
+      error,
     });
   };
 
@@ -30,12 +30,18 @@ const useGeoLocation = () => {
     if (!("geolocation" in navigator)) {
       onError({
         code: 0,
-        message: "Geolocation not supported"
+        message: "Geolocation not supported",
       });
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(onSuccess, onError);
+    const geoOptions = {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0,
+    };
+
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions);
   }, []);
 
   return location;
