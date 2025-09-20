@@ -1,3 +1,4 @@
+import React from 'react';
 import { Box, Typography, Grid, Paper, Button } from '@mui/material';
 
 const Dashboard = () => {

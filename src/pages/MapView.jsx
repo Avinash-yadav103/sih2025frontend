@@ -62,38 +62,46 @@ function MapView() {
         </div>
       </div>
 
-      {/* Map Type Buttons */}
-      <div className="category-buttons google-style">
-        <Button 
-          className={activeMap === 'standard' ? 'active' : ''} 
-          onClick={() => setActiveMap('standard')}
-        >
-          Standard
-        </Button>
-        <Button 
-          className={activeMap === 'markers' ? 'active' : ''} 
-          onClick={() => setActiveMap('markers')}
-        >
-          With Markers
-        </Button>
-        <Button 
-          className={activeMap === 'location' ? 'active' : ''} 
-          onClick={() => setActiveMap('location')}
-        >
-          Current Location
-        </Button>
-        <Button 
-          className={activeMap === 'draw' ? 'active' : ''} 
-          onClick={() => setActiveMap('draw')}
-        >
-          Draw Tools
-        </Button>
-        <Button 
-          className={activeMap === 'geofences' ? 'active' : ''} 
-          onClick={() => setActiveMap('geofences')}
-        >
-          Geofence
-        </Button>
+      {/* Map Controls Container */}
+      <div className="map-controls-container">
+        {/* Map Type Buttons */}
+        <div className="map-type-controls">
+          <Button 
+            className={activeMap === 'standard' ? 'active' : ''} 
+            onClick={() => setActiveMap('standard')}
+          >
+            Standard
+          </Button>
+          <Button 
+            className={activeMap === 'markers' ? 'active' : ''} 
+            onClick={() => setActiveMap('markers')}
+          >
+            With Markers
+          </Button>
+          <Button 
+            className={activeMap === 'location' ? 'active' : ''} 
+            onClick={() => setActiveMap('location')}
+          >
+            Current Location
+          </Button>
+          <Button 
+            className={activeMap === 'draw' ? 'active' : ''} 
+            onClick={() => setActiveMap('draw')}
+          >
+            Tourist HeatMap 
+          </Button>
+          <Button 
+            className={activeMap === 'geofences' ? 'active' : ''} 
+            onClick={() => setActiveMap('geofences')}
+          >
+            Geofence
+          </Button>
+        </div>
+
+        {/* Layer Toggle Buttons - Placeholder for future implementation */}
+        <div className="map-layer-controls">
+          {/* Add layer toggle buttons here if needed */}
+        </div>
       </div>
 
       {/* Filter Chips */}
@@ -130,7 +138,7 @@ function MapView() {
         </Button>
       </div>
 
-      {/* Map Controls */}
+      {/* Map Controls - Floating */}
       <div className="floating-controls">
         <div className="map-control-group">
           <button className="map-control-button">
