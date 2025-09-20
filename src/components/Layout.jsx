@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import './Layout.css';
-import { Box, AppBar, Toolbar, Typography, IconButton, Badge, Container, Divider } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import { 
+  Box, Typography, IconButton, Badge, Container, Divider, 
+  List, ListItem, ListItemText, ListItemIcon, ListItemAvatar,
+  Avatar, Button
+} from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MapIcon from '@mui/icons-material/Map';
@@ -19,6 +22,10 @@ import SecurityIcon from '@mui/icons-material/Security';
 import SearchIcon from '@mui/icons-material/Search';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import TranslateIcon from '@mui/icons-material/Translate';
+import MenuIcon from '@mui/icons-material/Menu';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 
 // Import local images
 import nav2Image from '../assets/images/nav2.jpg';
@@ -26,9 +33,91 @@ import nav3Image from '../assets/images/nav3.png';
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const notificationRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Sample notifications data
+  const notifications = [
+    {
+      id: 1,
+      type: 'alert',
+      title: 'High Alert: Tourist Area',
+      message: 'Unusual crowd gathering detected at Gangtok Market',
+      time: '10 minutes ago',
+      read: false,
+      path: '/police/alerts/1'
+    },
+    {
+      id: 2,
+      type: 'incident',
+      title: 'New Incident Report',
+      message: 'Theft reported at Hotel Himalaya, Darjeeling',
+      time: '25 minutes ago',
+      read: false,
+      path: '/police/incidents/2'
+    },
+    {
+      id: 3,
+      type: 'tourist',
+      title: 'Tourist Registration',
+      message: 'New international tourist group registered from Japan',
+      time: '1 hour ago',
+      read: true,
+      path: '/police/tourists/3'
+    },
+    {
+      id: 4,
+      type: 'alert',
+      title: 'Weather Warning',
+      message: 'Heavy rainfall expected in Gangtok region',
+      time: '2 hours ago',
+      read: true,
+      path: '/police/alerts/4'
+    }
+  ];
+
+  const unreadCount = notifications.filter(notif => !notif.read).length;
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleNotifications = () => {
+    setNotificationOpen(!notificationOpen);
+  };
+
+  const handleNotificationClick = (path) => {
+    setNotificationOpen(false);
+    navigate(path);
+  };
+
+  // Close notifications when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setNotificationOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [notificationRef]);
+
+  // Get notification icon based on type
+  const getNotificationIcon = (type) => {
+    switch(type) {
+      case 'alert':
+        return <ErrorOutlineIcon color="error" />;
+      case 'incident':
+        return <WarningIcon color="warning" />;
+      case 'tourist':
+        return <PersonOutlineIcon color="primary" />;
+      default:
+        return <NotificationsNoneIcon />;
+    }
   };
 
   return (
@@ -61,66 +150,118 @@ const Layout = () => {
         </Container>
       </div>
 
-      {/* Ministry header with logos */}
-      <div className="ministry-header">
+      {/* White navbar */}
+      <div className="white-navbar">
         <Container maxWidth={false}>
-          <div className="ministry-header-content">
-            <div className="ministry-branding">
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" 
-                alt="National Emblem of India" 
-                className="national-emblem" 
-              />
-              <div className="ministry-title">
-                <h1>पूर्वोत्तर पुलिस विभाग मंत्रालय</h1>
-                <h2>Ministry of North East Police Department</h2>
+          <div className="navbar-content">
+            <div className="navbar-left">
+              <IconButton
+                color="inherit"
+                aria-label="toggle sidebar"
+                onClick={toggleSidebar}
+                edge="start"
+                className={`nav-menu-button ${sidebarOpen ? 'open' : ''}`}
+              >
+                <MenuIcon />
+              </IconButton>
+              
+              <div className="ministry-branding">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" 
+                  alt="National Emblem of India" 
+                  className="national-emblem" 
+                />
+                <div className="ministry-title">
+                  <h1>पूर्वोत्तर पुलिस विभाग मंत्रालय</h1>
+                  <h2>Ministry of North East Police Department</h2>
+                </div>
               </div>
             </div>
-            <div className="ministry-logos">
-              {/* Using the provided local images */}
-              <img 
-                src={nav2Image} 
-                alt="Tourism Initiative" 
-                className="ministry-logo"
-              />
-              <img 
-                src={nav3Image} 
-                alt="Tourism Logo" 
-                className="ministry-logo"
-              />
+            
+            <div className="navbar-center">
+              <Typography variant="h6" className="dashboard-title">
+                Police Dashboard — Smart Tourist Safety Monitoring
+              </Typography>
+            </div>
+            
+            <div className="navbar-right">
+              <div className="notification-wrapper" ref={notificationRef}>
+                <IconButton 
+                  color="inherit" 
+                  className="notification-button"
+                  onClick={toggleNotifications}
+                >
+                  <Badge badgeContent={unreadCount} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+                
+                {notificationOpen && (
+                  <div className="notification-dropdown">
+                    <div className="notification-header">
+                      <Typography variant="h6">Notifications</Typography>
+                      <Typography variant="caption">{unreadCount} unread</Typography>
+                    </div>
+                    <Divider />
+                    <List className="notification-list">
+                      {notifications.length > 0 ? (
+                        notifications.map((notification) => (
+                          <ListItem 
+                            key={notification.id}
+                            className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                            onClick={() => handleNotificationClick(notification.path)}
+                          >
+                            <ListItemIcon className="notification-icon">
+                              {getNotificationIcon(notification.type)}
+                            </ListItemIcon>
+                            <ListItemText 
+                              primary={notification.title}
+                              secondary={notification.message}
+                              className="notification-text"
+                            />
+                            <Typography variant="caption" className="notification-time">
+                              {notification.time}
+                            </Typography>
+                          </ListItem>
+                        ))
+                      ) : (
+                        <ListItem className="no-notifications">
+                          <ListItemText primary="No new notifications" />
+                        </ListItem>
+                      )}
+                    </List>
+                    <Divider />
+                    <div className="notification-footer">
+                      <Button 
+                        variant="text" 
+                        size="small" 
+                        onClick={() => navigate('/police/alerts')}
+                      >
+                        View All Alerts
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="logo-container">
+                <img 
+                  src={nav2Image} 
+                  alt="Tourism Initiative" 
+                  className="navbar-logo"
+                />
+                <img 
+                  src={nav3Image} 
+                  alt="Tourism Logo" 
+                  className="navbar-logo"
+                />
+              </div>
             </div>
           </div>
         </Container>
       </div>
       
-      {/* Main navigation bar */}
-      <AppBar position="sticky" className="main-navbar">
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="toggle sidebar"
-            onClick={toggleSidebar}
-            edge="start"
-            className={`nav-menu-button ${sidebarOpen ? 'open' : ''}`}
-          >
-            <div className="nav-menu-icon">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </IconButton>
-          <Typography variant="h6" component="div" className="nav-title">
-            Police Dashboard — Smart Tourist Safety Monitoring
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      
+      {/* Main content area with sidebar */}
       <div className="main-container">
         <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
           <div className="sidebar-content">
