@@ -1,96 +1,63 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
-import './App.css'
-import { Box } from '@mui/material';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import ThemeProvider from './theme/ThemeProvider';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import MapView from './pages/MapView';
+import Alerts from './pages/Alerts';
+import AlertDetail from './pages/AlertDetail'
+import TouristList from './pages/TouristList';
+import TouristDetail from './pages/TouristDetail'
+import IncidentList from './pages/IncidentList';
+import IncidentDetail from './pages/IncidentDetail'
+import Dispatch from './pages/Dispatch';
+import UnitsList from './pages/UnitsList';
+import GeofenceManager from './pages/GeofenceManager';
+import IoTDashboard from './pages/IoTDashboard';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import Audit from './pages/Audit';
+import LandingPage from './pages/LandingPage';
+import Login from './pages/Login';
+import PoliceLogin from './pages/PoliceLogin';
+import AdminLogin from './pages/AdminLogin';
 import { DatabaseProvider } from './context/DatabaseContext';
 
-// Import pages
-import Dashboard from './pages/Dashboard'
-import MapView from './pages/MapView'
-import Alerts from './pages/Alerts'
-import AlertDetail from './pages/AlertDetail'
-import TouristList from './pages/TouristList'
-import TouristDetail from './pages/TouristDetail'
-import IncidentList from './pages/IncidentList'
-import IncidentDetail from './pages/IncidentDetail'
-import Dispatch from './pages/Dispatch'
-import UnitsList from './pages/UnitsList'
-import GeofenceManager from './pages/GeofenceManager'
-import IoTDashboard from './pages/IoTDashboard'
-import Reports from './pages/Reports'
-import Settings from './pages/Settings'
-import Audit from './pages/Audit'
-import Layout from './components/Layout'
-import MapWrapper from './pages/Maps/MapWrapper'
-import LandingPage from './pages/LandingPage'
-import AdminLogin from './pages/AdminLogin'
-import PoliceLogin from './pages/PoliceLogin'
-import AdminDashboard from './pages/AdminDashboard'
-import ReportDetail from './pages/ReportDetail'
-
-// Create theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1a237e',
-    },
-    secondary: {
-      main: '#f50057',
-    },
-    background: {
-      default: '#f5f5f5',
-    },
-  },
-});
+import './App.css';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider>
       <DatabaseProvider>
-        <CssBaseline />
-        <Router>
+        <BrowserRouter>
           <Routes>
-            {/* Landing Page */}
             <Route path="/" element={<LandingPage />} />
-
-            {/* Login routes */}
+            <Route path="/login" element={<Login />} />
             <Route path="/police/login" element={<PoliceLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-            
-            {/* Admin Dashboard */}
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            
-            {/* Fix for /mapi route - use the MapWrapper */}
-            <Route path="/mapi" element={<MapWrapper />} />
-            
-            {/* All routes are now inside the Layout without authentication check */}
-            <Route element={<Layout />}>
-              <Route path="/police" element={<Navigate to="/police/map" replace />} />
-              <Route path="/police/map" element={<MapView />} />
-              <Route path="/police/alerts" element={<Alerts />} />
-              <Route path="/police/alerts/:alertId" element={<AlertDetail />} />
-              <Route path="/police/tourists" element={<TouristList />} />
-              <Route path="/police/tourists/:touristId" element={<TouristDetail />} />
-              <Route path="/police/incidents" element={<IncidentList />} />
-              <Route path="/police/incidents/:incidentId" element={<IncidentDetail />} />
-              <Route path="/police/dispatch" element={<Dispatch />} />
-              <Route path="/police/units" element={<UnitsList />} />
-              <Route path="/police/geofences" element={<GeofenceManager />} />
-              <Route path="/police/iot" element={<IoTDashboard />} />
-              <Route path="/police/reports" element={<Reports />} />
-              <Route path="/police/settings" element={<Settings />} />
-              <Route path="/police/audit" element={<Audit />} />
-              <Route path="/report/:id" element={<ReportDetail />} />
+            <Route path="/" element={<Layout />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="map" element={<MapView />} />
+              <Route path="alerts" element={<Alerts />} />
+              <Route path="alerts/:alertId" element={<AlertDetail />} />
+              <Route path="tourists" element={<TouristList />} />
+              <Route path="tourists/:touristId" element={<TouristDetail />} />
+              <Route path="incidents" element={<IncidentList />} />
+              <Route path="incidents/:incidentId" element={<IncidentDetail />} />
+              <Route path="dispatch" element={<Dispatch />} />
+              <Route path="units" element={<UnitsList />} />
+              <Route path="geofences" element={<GeofenceManager />} />
+              <Route path="iot" element={<IoTDashboard />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="audit" element={<Audit />} />
+              <Route path="*" element={<Navigate to="/dashboard" />} />
             </Route>
-            
-            {/* Redirect non-matching paths to landing page instead */}
-            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Router>
+        </BrowserRouter>
       </DatabaseProvider>
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;
