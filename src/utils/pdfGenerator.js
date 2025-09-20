@@ -1,6 +1,5 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import { format } from 'date-fns';
 
 /**
  * Generate a PDF file for an E-FIR report
@@ -14,7 +13,7 @@ export const generateEFIRPDF = (report) => {
   
   // Add header
   doc.setFontSize(20);
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(0, 0, 128);
   doc.text('ELECTRONIC FIRST INFORMATION REPORT', pageWidth / 2, 20, { align: 'center' });
   
   // Add FIR number and date

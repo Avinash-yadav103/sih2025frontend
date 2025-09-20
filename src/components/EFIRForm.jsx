@@ -1,344 +1,370 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Box, Typography, TextField, Button, Grid, MenuItem,
-  FormControl, InputLabel, Select, Paper, CircularProgress,
-  Snackbar, Alert
+  TextField, 
+  Button, 
+  Grid, 
+  Box, 
+  Typography, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem, 
+  Paper,
+  CircularProgress,
+  Snackbar,
+  Alert,
+  Autocomplete
 } from '@mui/material';
-import eFIRService from '../services/eFIRService';
+import { createEFIR } from '../services/eFIRService';
+import supabase from '../utils/supabase';
 
-const EFIRForm = ({ onSubmit, initialData = null, isEdit = false, relatedEntity = null }) => {
-  const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
+const INCIDENT_TYPES = [
+  'THEFT',
+  'ASSAULT',
+  'HARASSMENT',
+  'MISSING_PERSON',
+  'MEDICAL_EMERGENCY',
+  'DISTRESS_SIGNAL',
+  'LOST_DOCUMENTS',
+  'OTHER'
+];
+
+const SEVERITY_LEVELS = [
+  { value: 'LOW', label: 'Low' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'HIGH', label: 'High' },
+  { value: 'CRITICAL', label: 'Critical' }
+];
+
+const EFIRForm = ({ onSubmitSuccess }) => {
   const [formData, setFormData] = useState({
-    title: '',
+    tourist_id: '',
+    incident_type: '',
     description: '',
-    status: 'open',
-    priority: 'medium',
     location: '',
-    entity_type: '',
-    related_entity_id: '',
-    details: {}
+    severity: 'MEDIUM',
+    reporter_details: {
+      name: '',
+      contact: '',
+      relation: ''
+    }
   });
-
-  // Load initial data if provided (for edit mode)
+  
+  const [touristOptions, setTouristOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+  const [selectedTourist, setSelectedTourist] = useState(null);
+  const [loadingTourists, setLoadingTourists] = useState(false);
+  const [touristSearch, setTouristSearch] = useState('');
+  
+  // Fetch tourists for autocomplete
   useEffect(() => {
-    if (initialData) {
-      setFormData(prev => ({
-        ...prev,
-        ...initialData
-      }));
-    }
+    const fetchTourists = async () => {
+      if (!touristSearch.trim()) return;
+      
+      setLoadingTourists(true);
+      try {
+        const { data, error } = await supabase
+          .from('tourists')
+          .select('id, name, passport_number, nationality')
+          .or(`name.ilike.%${touristSearch}%, passport_number.ilike.%${touristSearch}%`)
+          .limit(10);
+          
+        if (error) throw error;
+        
+        setTouristOptions(data.map(tourist => ({
+          id: tourist.id,
+          label: `${tourist.name} (${tourist.nationality || 'Unknown'}, ID: ${tourist.passport_number || 'Unknown'})`
+        })));
+      } catch (error) {
+        console.error('Error fetching tourists:', error);
+        setNotification({
+          open: true,
+          message: 'Failed to fetch tourists. Please try again.',
+          severity: 'error'
+        });
+      } finally {
+        setLoadingTourists(false);
+      }
+    };
     
-    // If we have a related entity (e.g., tourist or incident) but no initialData
-    if (!initialData && relatedEntity) {
-      const entityType = relatedEntity.passport_number ? 'tourist' : 'incident';
-      
-      let title = '';
-      if (entityType === 'tourist') {
-        title = `Missing Tourist Report - ${relatedEntity.name || 'Unknown'}`;
-      } else {
-        title = `Incident Report - ${relatedEntity.title || relatedEntity.type || 'Unknown'}`;
-      }
-      
-      setFormData(prev => ({
-        ...prev,
-        title,
-        entity_type: entityType,
-        related_entity_id: relatedEntity.id,
-        location: relatedEntity.last_known_location || relatedEntity.location || '',
-        priority: entityType === 'tourist' ? 'high' : (relatedEntity.severity === 'critical' ? 'critical' : 'high'),
-        details: {
-          [entityType === 'tourist' ? 'tourist_data' : 'incident_data']: relatedEntity
+    const timer = setTimeout(() => {
+      fetchTourists();
+    }, 500); // Debounce search
+    
+    return () => clearTimeout(timer);
+  }, [touristSearch]);
+  
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    if (name.includes('.')) {
+      // Handle nested fields (reporter_details)
+      const [parent, child] = name.split('.');
+      setFormData({
+        ...formData,
+        [parent]: {
+          ...formData[parent],
+          [child]: value
         }
-      }));
-    }
-  }, [initialData, relatedEntity]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleDetailsChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      details: {
-        ...prev.details,
+      });
+    } else {
+      setFormData({
+        ...formData,
         [name]: value
-      }
-    }));
+      });
+    }
   };
-
+  
+  const handleTouristChange = (event, newValue) => {
+    setSelectedTourist(newValue);
+    if (newValue) {
+      setFormData({
+        ...formData,
+        tourist_id: newValue.id
+      });
+    } else {
+      setFormData({
+        ...formData,
+        tourist_id: ''
+      });
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     
+    // Validate form
+    if (!formData.tourist_id || !formData.incident_type || !formData.description || !formData.location) {
+      setNotification({
+        open: true,
+        message: 'Please fill all required fields',
+        severity: 'error'
+      });
+      return;
+    }
+    
+    setLoading(true);
     try {
-      let result;
-      if (isEdit && initialData?.id) {
-        result = await eFIRService.updateEFIR(initialData.id, formData);
-        showNotification('E-FIR updated successfully', 'success');
-      } else {
-        result = await eFIRService.createEFIR(formData);
-        showNotification('E-FIR created successfully', 'success');
-      }
+      const result = await createEFIR({
+        ...formData,
+        is_automatic: false // This is a manually created E-FIR
+      });
       
-      if (onSubmit) {
-        onSubmit(result);
+      setNotification({
+        open: true,
+        message: 'E-FIR created successfully!',
+        severity: 'success'
+      });
+      
+      // Reset form
+      setFormData({
+        tourist_id: '',
+        incident_type: '',
+        description: '',
+        location: '',
+        severity: 'MEDIUM',
+        reporter_details: {
+          name: '',
+          contact: '',
+          relation: ''
+        }
+      });
+      setSelectedTourist(null);
+      
+      // Notify parent component
+      if (onSubmitSuccess) {
+        onSubmitSuccess(result);
       }
     } catch (error) {
-      console.error('Error submitting E-FIR:', error);
-      showNotification(`Error: ${error.message || 'Failed to save E-FIR'}`, 'error');
+      console.error('Error creating E-FIR:', error);
+      setNotification({
+        open: true,
+        message: 'Failed to create E-FIR. Please try again.',
+        severity: 'error'
+      });
     } finally {
       setLoading(false);
     }
   };
-
-  const showNotification = (message, severity) => {
+  
+  const handleCloseNotification = () => {
     setNotification({
-      open: true,
-      message,
-      severity
+      ...notification,
+      open: false
     });
   };
-
-  const handleCloseNotification = () => {
-    setNotification(prev => ({ ...prev, open: false }));
-  };
-
+  
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom>
-        {isEdit ? 'Edit E-FIR' : 'Create New E-FIR'}
+        Create New E-FIR
       </Typography>
       
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-        <Grid container spacing={2}>
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={3}>
+          {/* Tourist Selection */}
           <Grid item xs={12}>
-            <TextField
+            <Autocomplete
               fullWidth
-              label="Title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              disabled={loading}
+              id="tourist-autocomplete"
+              options={touristOptions}
+              loading={loadingTourists}
+              value={selectedTourist}
+              onChange={handleTouristChange}
+              onInputChange={(e, value) => setTouristSearch(value)}
+              renderInput={(params) => (
+                <TextField 
+                  {...params} 
+                  label="Select Tourist" 
+                  required
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingTourists ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
             />
           </Grid>
           
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              multiline
-              rows={3}
-              disabled={loading}
-            />
-          </Grid>
-          
+          {/* Incident Type */}
           <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
+            <FormControl fullWidth required>
+              <InputLabel>Incident Type</InputLabel>
               <Select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                label="Status"
-                disabled={loading}
+                name="incident_type"
+                value={formData.incident_type}
+                onChange={handleInputChange}
+                label="Incident Type"
               >
-                <MenuItem value="open">Open</MenuItem>
-                <MenuItem value="in_progress">In Progress</MenuItem>
-                <MenuItem value="resolved">Resolved</MenuItem>
-                <MenuItem value="closed">Closed</MenuItem>
+                {INCIDENT_TYPES.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type.replace(/_/g, ' ')}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
           
+          {/* Severity */}
           <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Priority</InputLabel>
+            <FormControl fullWidth required>
+              <InputLabel>Severity</InputLabel>
               <Select
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-                label="Priority"
-                disabled={loading}
+                name="severity"
+                value={formData.severity}
+                onChange={handleInputChange}
+                label="Severity"
               >
-                <MenuItem value="low">Low</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="high">High</MenuItem>
-                <MenuItem value="critical">Critical</MenuItem>
+                {SEVERITY_LEVELS.map((level) => (
+                  <MenuItem key={level.value} value={level.value}>
+                    {level.label}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
           
+          {/* Location */}
           <Grid item xs={12}>
             <TextField
               fullWidth
               label="Location"
               name="location"
               value={formData.location}
-              onChange={handleChange}
-              disabled={loading}
+              onChange={handleInputChange}
+              required
             />
           </Grid>
           
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Entity Type</InputLabel>
-              <Select
-                name="entity_type"
-                value={formData.entity_type}
-                onChange={handleChange}
-                label="Entity Type"
-                disabled={loading || (relatedEntity !== null)}
-              >
-                <MenuItem value="tourist">Tourist</MenuItem>
-                <MenuItem value="incident">Incident</MenuItem>
-                <MenuItem value="other">Other</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
+          {/* Description */}
+          <Grid item xs={12}>
             <TextField
               fullWidth
-              label="Related Entity ID"
-              name="related_entity_id"
-              value={formData.related_entity_id}
-              onChange={handleChange}
-              disabled={loading || (relatedEntity !== null)}
+              label="Description"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              multiline
+              rows={4}
+              required
             />
           </Grid>
           
-          {formData.entity_type === 'tourist' && (
-            <>
-              <Grid item xs={12}>
-                <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
-                  Tourist Details
-                </Typography>
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Last Seen Time"
-                  name="last_seen"
-                  type="datetime-local"
-                  value={formData.details.last_seen || ''}
-                  onChange={handleDetailsChange}
-                  InputLabelProps={{ shrink: true }}
-                  disabled={loading}
-                />
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Last Known Location"
-                  name="last_known_location"
-                  value={formData.details.last_known_location || ''}
-                  onChange={handleDetailsChange}
-                  disabled={loading}
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Appearance"
-                  name="appearance"
-                  value={formData.details.appearance || ''}
-                  onChange={handleDetailsChange}
-                  multiline
-                  rows={2}
-                  disabled={loading}
-                />
-              </Grid>
-            </>
-          )}
-          
-          {formData.entity_type === 'incident' && (
-            <>
-              <Grid item xs={12}>
-                <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
-                  Incident Details
-                </Typography>
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Incident Type"
-                  name="incident_type"
-                  value={formData.details.incident_type || ''}
-                  onChange={handleDetailsChange}
-                  disabled={loading}
-                />
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Incident Time"
-                  name="incident_time"
-                  type="datetime-local"
-                  value={formData.details.incident_time || ''}
-                  onChange={handleDetailsChange}
-                  InputLabelProps={{ shrink: true }}
-                  disabled={loading}
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Incident Description"
-                  name="incident_description"
-                  value={formData.details.incident_description || ''}
-                  onChange={handleDetailsChange}
-                  multiline
-                  rows={3}
-                  disabled={loading}
-                />
-              </Grid>
-            </>
-          )}
-          
+          {/* Reporter Details Section */}
           <Grid item xs={12}>
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button 
-                type="submit" 
-                variant="contained" 
-                color="primary" 
+            <Typography variant="h6" gutterBottom>
+              Reporter Details
+            </Typography>
+          </Grid>
+          
+          {/* Reporter Name */}
+          <Grid item xs={12} md={4}>
+            <TextField
+              fullWidth
+              label="Reporter Name"
+              name="reporter_details.name"
+              value={formData.reporter_details.name}
+              onChange={handleInputChange}
+            />
+          </Grid>
+          
+          {/* Reporter Contact */}
+          <Grid item xs={12} md={4}>
+            <TextField
+              fullWidth
+              label="Reporter Contact"
+              name="reporter_details.contact"
+              value={formData.reporter_details.contact}
+              onChange={handleInputChange}
+            />
+          </Grid>
+          
+          {/* Reporter Relation */}
+          <Grid item xs={12} md={4}>
+            <TextField
+              fullWidth
+              label="Relation to Tourist"
+              name="reporter_details.relation"
+              value={formData.reporter_details.relation}
+              onChange={handleInputChange}
+            />
+          </Grid>
+          
+          {/* Submit Button */}
+          <Grid item xs={12}>
+            <Box display="flex" justifyContent="center" mt={2}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                size="large"
                 disabled={loading}
-                sx={{ minWidth: 120 }}
+                startIcon={loading ? <CircularProgress size={20} /> : null}
               >
-                {loading ? <CircularProgress size={24} /> : (isEdit ? 'Update' : 'Submit')}
+                {loading ? 'Submitting...' : 'Submit E-FIR'}
               </Button>
             </Box>
           </Grid>
         </Grid>
-      </Box>
+      </form>
       
+      {/* Notification Snackbar */}
       <Snackbar
         open={notification.open}
         autoHideDuration={6000}
         onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={handleCloseNotification} 
-          severity={notification.severity}
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleCloseNotification} severity={notification.severity}>
           {notification.message}
         </Alert>
       </Snackbar>

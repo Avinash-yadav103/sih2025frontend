@@ -1,484 +1,539 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Container, Typography, Paper, Table, TableBody, TableCell, 
-  TableContainer, TableHead, TableRow, Button, Box, IconButton,
-  Dialog, DialogActions, DialogContent, DialogTitle, 
-  TextField, CircularProgress, Tabs, Tab, Snackbar, Alert,
-  Chip, MenuItem, Select, FormControl, InputLabel
+  Container, 
+  Grid, 
+  Paper, 
+  Typography, 
+  Button, 
+  Box, 
+  Tabs, 
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  CircularProgress,
+  Badge,
+  Tooltip,
+  Snackbar,
+  Alert
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { FileDownload, Delete, Edit, Add, Share, VisibilityOutlined } from '@mui/icons-material';
-import Layout from '../components/Layout';
-import eFIRService from '../services/eFIRService';
-import { generatePDF } from '../utils/pdfGenerator';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+  PictureAsPdf, 
+  Visibility, 
+  Share, 
+  Add,
+  Refresh,
+  Download
+} from '@mui/icons-material';
 import EFIRForm from '../components/EFIRForm';
-import { format } from 'date-fns';
+import { 
+  getAllEFIRs, 
+  generateEFIRPDF, 
+  shareEFIRViaEmail 
+} from '../services/eFIRService';
+import { runManualCheck } from '../services/backgroundService';
+
+// Status color mapping
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'PENDING':
+      return 'warning';
+    case 'IN_PROGRESS':
+      return 'info';
+    case 'RESOLVED':
+      return 'success';
+    case 'REJECTED':
+      return 'error';
+    default:
+      return 'default';
+  }
+};
+
+// Severity color mapping
+const getSeverityColor = (severity) => {
+  switch (severity) {
+    case 'LOW':
+      return '#66bb6a';
+    case 'MEDIUM':
+      return '#ffa726';
+    case 'HIGH':
+      return '#f44336';
+    case 'CRITICAL':
+      return '#b71c1c';
+    default:
+      return '#9e9e9e';
+  }
+};
 
 const Reports = () => {
-  const [reports, setReports] = useState([]);
-  const [eFIRs, setEFIRs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [currentTab, setCurrentTab] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [openDialog, setOpenDialog] = useState(false);
-  const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
   const navigate = useNavigate();
-
-  // Fetch reports and E-FIRs on component mount
+  const [activeTab, setActiveTab] = useState(0);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [openShareDialog, setOpenShareDialog] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [email, setEmail] = useState('');
+  const [sharingLoading, setSharingLoading] = useState(false);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+  const [generatingAutomaticReports, setGeneratingAutomaticReports] = useState(false);
+  const [newAutomaticReportsCount, setNewAutomaticReportsCount] = useState(0);
+  const [filters, setFilters] = useState({
+    status: '',
+    dateFrom: '',
+    dateTo: ''
+  });
+  
+  // Fetch reports on component mount and when filters change
   useEffect(() => {
     fetchReports();
-    fetchEFIRs();
+  }, [filters]);
+  
+  // Listen for new automatic E-FIRs
+  useEffect(() => {
+    const handleNewAutomaticEFIR = () => {
+      setNewAutomaticReportsCount(prev => prev + 1);
+    };
+    
+    window.addEventListener('new-automatic-efir', handleNewAutomaticEFIR);
+    
+    return () => {
+      window.removeEventListener('new-automatic-efir', handleNewAutomaticEFIR);
+    };
   }, []);
-
+  
   const fetchReports = async () => {
     setLoading(true);
     try {
-      // Example data structure - replace with actual API call
-      const dummyReports = [
-        { id: 1, title: 'Monthly Security Report', type: 'security', created_at: '2023-09-15T10:30:00Z' },
-        { id: 2, title: 'Tourist Flow Analysis', type: 'analytics', created_at: '2023-09-10T14:45:00Z' },
-        { id: 3, title: 'Incident Summary Q3', type: 'incident', created_at: '2023-09-05T09:15:00Z' },
-      ];
-      setReports(dummyReports);
+      const data = await getAllEFIRs(filters);
+      setReports(data);
+      setNewAutomaticReportsCount(0); // Reset counter after fetching
     } catch (error) {
       console.error('Error fetching reports:', error);
-      showNotification('Failed to fetch reports', 'error');
+      setNotification({
+        open: true,
+        message: 'Failed to fetch reports. Please try again.',
+        severity: 'error'
+      });
     } finally {
       setLoading(false);
     }
   };
-
-  const fetchEFIRs = async () => {
-    setLoading(true);
-    try {
-      const data = await eFIRService.getAllEFIRs();
-      setEFIRs(data || []);
-    } catch (error) {
-      console.error('Error fetching E-FIRs:', error);
-      showNotification('Failed to fetch E-FIRs', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
   const handleTabChange = (event, newValue) => {
-    setCurrentTab(newValue);
-    setSearchQuery('');
-    setStatusFilter('all');
+    setActiveTab(newValue);
   };
-
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
+  
+  const handleViewReport = (reportId) => {
+    navigate(`/reports/${reportId}`);
   };
-
-  const handleStatusFilterChange = (event) => {
-    setStatusFilter(event.target.value);
-  };
-
-  const filteredEFIRs = eFIRs.filter(efir => {
-    const matchesSearch = searchQuery === '' || 
-      efir.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      efir.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || efir.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
-
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
-  const handleCreateEFIR = (newEFIR) => {
-    setEFIRs([newEFIR, ...eFIRs]);
-    handleCloseDialog();
-  };
-
-  const handleViewEFIR = (id) => {
-    navigate(`/reports/${id}`);
-  };
-
-  const handleGeneratePDF = async (efir) => {
+  
+  const handleGeneratePDF = async (reportId) => {
     try {
-      setLoading(true);
-      const pdfBlob = await eFIRService.generateEFIRPDF(efir);
+      const pdfBlob = await generateEFIRPDF(reportId);
       
       // Create a URL for the blob
-      const url = URL.createObjectURL(pdfBlob);
+      const blobUrl = URL.createObjectURL(pdfBlob);
       
       // Create a link element
       const link = document.createElement('a');
-      link.href = url;
-      link.download = `EFIR-${efir.id}-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+      link.href = blobUrl;
+      link.download = `E-FIR-${reportId}.pdf`;
       
-      // Append to the document, click, and remove
+      // Append to the document, click and remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      showNotification('PDF generated successfully', 'success');
+      // Revoke the object URL to free up memory
+      URL.revokeObjectURL(blobUrl);
+      
+      setNotification({
+        open: true,
+        message: 'PDF generated and downloaded successfully',
+        severity: 'success'
+      });
     } catch (error) {
       console.error('Error generating PDF:', error);
-      showNotification('Failed to generate PDF', 'error');
+      setNotification({
+        open: true,
+        message: 'Failed to generate PDF. Please try again.',
+        severity: 'error'
+      });
+    }
+  };
+  
+  const handleOpenShareDialog = (report) => {
+    setSelectedReport(report);
+    setOpenShareDialog(true);
+  };
+  
+  const handleCloseShareDialog = () => {
+    setOpenShareDialog(false);
+    setSelectedReport(null);
+    setEmail('');
+  };
+  
+  const handleShareReport = async () => {
+    if (!email || !selectedReport) return;
+    
+    setSharingLoading(true);
+    try {
+      await shareEFIRViaEmail(selectedReport.id, email);
+      
+      setNotification({
+        open: true,
+        message: `Report shared successfully with ${email}`,
+        severity: 'success'
+      });
+      
+      handleCloseShareDialog();
+    } catch (error) {
+      console.error('Error sharing report:', error);
+      setNotification({
+        open: true,
+        message: 'Failed to share report. Please try again.',
+        severity: 'error'
+      });
     } finally {
-      setLoading(false);
+      setSharingLoading(false);
     }
   };
-
-  const handleShareEFIR = (efir) => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: efir.title,
-          text: `E-FIR: ${efir.title}`,
-          url: `${window.location.origin}/reports/${efir.id}`
-        })
-        .then(() => showNotification('Shared successfully', 'success'))
-        .catch((error) => console.error('Error sharing:', error));
-    } else {
-      // Fallback for browsers that don't support the Web Share API
-      navigator.clipboard.writeText(`${window.location.origin}/reports/${efir.id}`);
-      showNotification('Link copied to clipboard', 'info');
-    }
-  };
-
-  const handleDeleteEFIR = async (id) => {
-    if (window.confirm('Are you sure you want to delete this E-FIR?')) {
-      try {
-        setLoading(true);
-        await eFIRService.deleteEFIR(id);
-        setEFIRs(eFIRs.filter(efir => efir.id !== id));
-        showNotification('E-FIR deleted successfully', 'success');
-      } catch (error) {
-        console.error('Error deleting E-FIR:', error);
-        showNotification('Failed to delete E-FIR', 'error');
-      } finally {
-        setLoading(false);
+  
+  const handleRunAutomaticReportCheck = async () => {
+    setGeneratingAutomaticReports(true);
+    try {
+      const newReports = await runManualCheck();
+      
+      if (newReports.length > 0) {
+        fetchReports(); // Refresh the list
+        setNotification({
+          open: true,
+          message: `${newReports.length} new automatic E-FIR(s) generated`,
+          severity: 'success'
+        });
+      } else {
+        setNotification({
+          open: true,
+          message: 'No new automatic E-FIRs were needed at this time',
+          severity: 'info'
+        });
       }
+    } catch (error) {
+      console.error('Error generating automatic reports:', error);
+      setNotification({
+        open: true,
+        message: 'Failed to generate automatic reports. Please try again.',
+        severity: 'error'
+      });
+    } finally {
+      setGeneratingAutomaticReports(false);
     }
   };
-
-  const showNotification = (message, severity) => {
+  
+  const handleCloseNotification = () => {
     setNotification({
-      open: true,
-      message,
-      severity
+      ...notification,
+      open: false
     });
   };
-
-  const handleCloseNotification = () => {
-    setNotification(prev => ({ ...prev, open: false }));
+  
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters({
+      ...filters,
+      [name]: value
+    });
   };
-
-  const renderStatusChip = (status) => {
-    let color;
-    switch (status) {
-      case 'open':
-        color = 'primary';
-        break;
-      case 'in_progress':
-        color = 'warning';
-        break;
-      case 'resolved':
-        color = 'success';
-        break;
-      case 'closed':
-        color = 'default';
-        break;
-      default:
-        color = 'default';
-    }
-    
-    return <Chip label={status.replace('_', ' ')} color={color} size="small" />;
+  
+  const handleSubmitSuccess = (newReport) => {
+    fetchReports(); // Refresh the list
+    setActiveTab(0); // Switch back to the list tab
   };
-
-  const renderPriorityChip = (priority) => {
-    let color;
-    switch (priority) {
-      case 'low':
-        color = 'info';
-        break;
-      case 'medium':
-        color = 'success';
-        break;
-      case 'high':
-        color = 'warning';
-        break;
-      case 'critical':
-        color = 'error';
-        break;
-      default:
-        color = 'default';
-    }
-    
-    return <Chip label={priority} color={color} size="small" />;
-  };
-
+  
   return (
-    <Layout>
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Reports & E-FIRs
-        </Typography>
-        
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs value={currentTab} onChange={handleTabChange} aria-label="report tabs">
-            <Tab label="E-FIRs" />
-            <Tab label="Reports" />
-          </Tabs>
-        </Box>
-        
-        {currentTab === 0 && (
-          <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1 }}>
-                <TextField
-                  label="Search E-FIRs"
-                  variant="outlined"
-                  size="small"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  sx={{ width: 250 }}
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h4" gutterBottom>
+              E-FIR Reports
+              {newAutomaticReportsCount > 0 && (
+                <Badge 
+                  badgeContent={newAutomaticReportsCount} 
+                  color="error" 
+                  sx={{ ml: 2 }}
                 />
-                
-                <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={statusFilter}
-                    onChange={handleStatusFilterChange}
-                    label="Status"
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    <MenuItem value="open">Open</MenuItem>
-                    <MenuItem value="in_progress">In Progress</MenuItem>
-                    <MenuItem value="resolved">Resolved</MenuItem>
-                    <MenuItem value="closed">Closed</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+              )}
+            </Typography>
+            
+            <Box>
+              <Tooltip title="Generate automatic reports">
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={generatingAutomaticReports ? <CircularProgress size={20} /> : <Refresh />}
+                  onClick={handleRunAutomaticReportCheck}
+                  disabled={generatingAutomaticReports}
+                  sx={{ mr: 2 }}
+                >
+                  Run Auto Check
+                </Button>
+              </Tooltip>
               
               <Button
                 variant="contained"
                 color="primary"
                 startIcon={<Add />}
-                onClick={handleOpenDialog}
+                onClick={() => setActiveTab(1)}
               >
-                New E-FIR
+                Create New E-FIR
               </Button>
             </Box>
-            
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Title</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Priority</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Created</TableCell>
-                    <TableCell align="center">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                        <CircularProgress />
-                      </TableCell>
-                    </TableRow>
-                  ) : filteredEFIRs.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                        <Typography variant="body1" color="textSecondary">
-                          No E-FIRs found
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredEFIRs.map((efir) => (
-                      <TableRow key={efir.id} hover>
-                        <TableCell>{efir.title}</TableCell>
-                        <TableCell>{renderStatusChip(efir.status)}</TableCell>
-                        <TableCell>{renderPriorityChip(efir.priority)}</TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={efir.entity_type} 
-                            size="small"
-                            color={efir.entity_type === 'tourist' ? 'secondary' : 'primary'}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {efir.created_at ? format(new Date(efir.created_at), 'dd MMM yyyy, HH:mm') : 'N/A'}
-                        </TableCell>
-                        <TableCell align="center">
-                          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                            <IconButton 
-                              size="small" 
-                              color="primary" 
-                              onClick={() => handleViewEFIR(efir.id)}
-                              title="View"
-                            >
-                              <VisibilityOutlined fontSize="small" />
-                            </IconButton>
-                            
-                            <IconButton 
-                              size="small" 
-                              color="secondary" 
-                              onClick={() => handleGeneratePDF(efir)}
-                              title="Download PDF"
-                            >
-                              <FileDownload fontSize="small" />
-                            </IconButton>
-                            
-                            <IconButton 
-                              size="small" 
-                              color="info" 
-                              onClick={() => handleShareEFIR(efir)}
-                              title="Share"
-                            >
-                              <Share fontSize="small" />
-                            </IconButton>
-                            
-                            <IconButton 
-                              size="small" 
-                              color="error" 
-                              onClick={() => handleDeleteEFIR(efir.id)}
-                              title="Delete"
-                            >
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
           </Box>
-        )}
-        
-        {currentTab === 1 && (
-          <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <TextField
-                label="Search Reports"
-                variant="outlined"
-                size="small"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                sx={{ width: 250 }}
-              />
-              
-              <Button variant="contained" color="primary" startIcon={<Add />}>
-                Generate Report
-              </Button>
-            </Box>
+          
+          <Paper sx={{ width: '100%', mb: 2 }}>
+            <Tabs 
+              value={activeTab} 
+              onChange={handleTabChange}
+              indicatorColor="primary"
+              textColor="primary"
+              variant="fullWidth"
+            >
+              <Tab label="E-FIR List" />
+              <Tab label="Create New E-FIR" />
+            </Tabs>
             
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Title</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Created</TableCell>
-                    <TableCell align="center">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
-                        <CircularProgress />
-                      </TableCell>
-                    </TableRow>
-                  ) : reports.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
-                        <Typography variant="body1" color="textSecondary">
-                          No reports found
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    reports
-                      .filter(report => 
-                        searchQuery === '' || 
-                        report.title.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
-                      .map((report) => (
-                      <TableRow key={report.id} hover>
-                        <TableCell>{report.title}</TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={report.type} 
-                            size="small"
-                            color={
-                              report.type === 'security' ? 'error' : 
-                              report.type === 'analytics' ? 'info' : 'default'
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(report.created_at), 'dd MMM yyyy, HH:mm')}
-                        </TableCell>
-                        <TableCell align="center">
-                          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                            <IconButton size="small" color="primary">
-                              <VisibilityOutlined fontSize="small" />
-                            </IconButton>
-                            
-                            <IconButton size="small" color="secondary">
-                              <FileDownload fontSize="small" />
-                            </IconButton>
-                            
-                            <IconButton size="small" color="info">
-                              <Share fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            {/* E-FIR List Tab */}
+            {activeTab === 0 && (
+              <Box p={3}>
+                {/* Filters */}
+                <Grid container spacing={2} mb={3}>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      select
+                      fullWidth
+                      label="Status"
+                      name="status"
+                      value={filters.status}
+                      onChange={handleFilterChange}
+                      SelectProps={{
+                        native: true,
+                      }}
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="IN_PROGRESS">In Progress</option>
+                      <option value="RESOLVED">Resolved</option>
+                      <option value="REJECTED">Rejected</option>
+                    </TextField>
+                  </Grid>
+                  
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      label="From Date"
+                      name="dateFrom"
+                      type="date"
+                      value={filters.dateFrom}
+                      onChange={handleFilterChange}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      label="To Date"
+                      name="dateTo"
+                      type="date"
+                      value={filters.dateTo}
+                      onChange={handleFilterChange}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+                
+                {loading ? (
+                  <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+                    <CircularProgress />
+                  </Box>
+                ) : (
+                  <TableContainer>
+                    <Table aria-label="E-FIR reports table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>ID</TableCell>
+                          <TableCell>Type</TableCell>
+                          <TableCell>Description</TableCell>
+                          <TableCell>Location</TableCell>
+                          <TableCell>Created</TableCell>
+                          <TableCell>Status</TableCell>
+                          <TableCell>Severity</TableCell>
+                          <TableCell align="center">Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {reports.length > 0 ? (
+                          reports.map((report) => (
+                            <TableRow 
+                              key={report.id}
+                              sx={{ 
+                                backgroundColor: report.is_automatic ? 'rgba(255, 152, 0, 0.1)' : 'inherit',
+                                '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+                              }}
+                            >
+                              <TableCell>{report.id}</TableCell>
+                              <TableCell>
+                                {report.incident_type.replace(/_/g, ' ')}
+                                {report.is_automatic && (
+                                  <Chip 
+                                    size="small" 
+                                    label="Auto" 
+                                    color="warning" 
+                                    variant="outlined" 
+                                    sx={{ ml: 1 }} 
+                                  />
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {report.description.length > 50 
+                                  ? `${report.description.substring(0, 50)}...` 
+                                  : report.description}
+                              </TableCell>
+                              <TableCell>{report.location}</TableCell>
+                              <TableCell>{new Date(report.created_at).toLocaleDateString()}</TableCell>
+                              <TableCell>
+                                <Chip 
+                                  label={report.status} 
+                                  color={getStatusColor(report.status)} 
+                                  size="small" 
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Chip 
+                                  label={report.severity} 
+                                  size="small" 
+                                  style={{ 
+                                    backgroundColor: getSeverityColor(report.severity),
+                                    color: 'white'
+                                  }} 
+                                />
+                              </TableCell>
+                              <TableCell align="center">
+                                <Tooltip title="View Details">
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={() => handleViewReport(report.id)}
+                                    color="primary"
+                                  >
+                                    <Visibility />
+                                  </IconButton>
+                                </Tooltip>
+                                
+                                <Tooltip title="Download PDF">
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={() => handleGeneratePDF(report.id)}
+                                    color="secondary"
+                                  >
+                                    <PictureAsPdf />
+                                  </IconButton>
+                                </Tooltip>
+                                
+                                <Tooltip title="Share E-FIR">
+                                  <IconButton 
+                                    size="small" 
+                                    onClick={() => handleOpenShareDialog(report)}
+                                    color="info"
+                                  >
+                                    <Share />
+                                  </IconButton>
+                                </Tooltip>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={8} align="center">
+                              No reports found
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </Box>
+            )}
+            
+            {/* Create New E-FIR Tab */}
+            {activeTab === 1 && (
+              <Box p={3}>
+                <EFIRForm onSubmitSuccess={handleSubmitSuccess} />
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+      
+      {/* Share Dialog */}
+      <Dialog open={openShareDialog} onClose={handleCloseShareDialog}>
+        <DialogTitle>Share E-FIR Report</DialogTitle>
+        <DialogContent>
+          <Box mt={2}>
+            <TextField
+              fullWidth
+              label="Email Address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </Box>
-        )}
-        
-        {/* E-FIR Creation Dialog */}
-        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-          <DialogTitle>Create New E-FIR</DialogTitle>
-          <DialogContent>
-            <EFIRForm onSubmit={handleCreateEFIR} />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog}>Cancel</Button>
-          </DialogActions>
-        </Dialog>
-        
-        {/* Notification Snackbar */}
-        <Snackbar
-          open={notification.open}
-          autoHideDuration={6000}
-          onClose={handleCloseNotification}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert 
-            onClose={handleCloseNotification} 
-            severity={notification.severity}
-            sx={{ width: '100%' }}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseShareDialog}>Cancel</Button>
+          <Button 
+            onClick={handleShareReport} 
+            color="primary" 
+            disabled={!email || sharingLoading}
+            startIcon={sharingLoading ? <CircularProgress size={20} /> : null}
           >
-            {notification.message}
-          </Alert>
-        </Snackbar>
-      </Container>
-    </Layout>
+            Share
+          </Button>
+        </DialogActions>
+      </Dialog>
+      
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={handleCloseNotification}
+      >
+        <Alert onClose={handleCloseNotification} severity={notification.severity}>
+          {notification.message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
 };
 

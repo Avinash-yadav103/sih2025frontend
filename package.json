@@ -19,6 +19,7 @@
     "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.12.2",
     "jspdf": "^3.0.3",
+    "jspdf-autotable": "^5.0.2",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
     "leaflet.heat": "^0.2.0",
