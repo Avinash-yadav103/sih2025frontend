@@ -1,10 +1,8 @@
 import React, { useState, useRef } from "react";
-import Header from "../components/Header";
 import { MapContainer, TileLayer, Marker, Circle, Polygon } from "react-leaflet";
 import L from "leaflet";
 import osm from "./osm-providers";
 import "leaflet/dist/leaflet.css";
-import ExternalInfo from "../components/ExternalInfo";
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -35,43 +33,27 @@ const DrawMap = () => {
   ];
 
   return (
-    <>
-      <Header title="React Leaflet - Draw Examples" />
-
-      <ExternalInfo page="leafletDraw" />
-
-      <div className="row">
-        <div className="col text-center">
-          <h2>React-leaflet - Sample Shapes</h2>
-          <p>
-            (Note: Drawing tools disabled - install{" "}
-            <a href="https://www.npmjs.com/package/@react-leaflet/react-leaflet-draw">
-              @react-leaflet/react-leaflet-draw
-            </a>{" "}
-            for full features)
-          </p>
-
-          <div className="col">
-            <MapContainer center={center} zoom={ZOOM_LEVEL} ref={mapRef}>
-              <TileLayer
-                url={osm.maptiler.url}
-                attribution={osm.maptiler.attribution}
-              />
-              <Marker position={center}></Marker>
-              <Circle
-                center={circle}
-                pathOptions={redOptions}
-                radius={500}
-              />
-              <Polygon
-                pathOptions={purpleOptions}
-                positions={polygon}
-              />
-            </MapContainer>
-          </div>
-        </div>
-      </div>
-    </>
+    <MapContainer 
+      center={center} 
+      zoom={ZOOM_LEVEL} 
+      ref={mapRef}
+      style={{ height: '100%', width: '100%' }} // Explicitly set height and width
+    >
+      <TileLayer
+        url={osm.maptiler.url}
+        attribution={osm.maptiler.attribution}
+      />
+      <Marker position={center}></Marker>
+      <Circle
+        center={circle}
+        pathOptions={redOptions}
+        radius={500}
+      />
+      <Polygon
+        pathOptions={purpleOptions}
+        positions={polygon}
+      />
+    </MapContainer>
   );
 };
 

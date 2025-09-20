@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import Header from "../components/Header";
-
 import { MapContainer, TileLayer } from "react-leaflet";
 import osm from "./osm-providers";
 import { useRef } from "react";
@@ -14,16 +12,16 @@ const BasicMap = () => {
 
     return (
         <>
-            <Header title="React Leaflet Map Example" />
-
             <ExternalInfo page="leafletBasic" />
-
             <div className="row">
                 <div className="col text-center">
-                    <h2>React-leaflet - Basic Openstreet Maps</h2>
-                    <p>Loading basic map using layer from maptiler</p>
                     <div className="col">
-                        <MapContainer center={center} zoom={ZOOM_LEVEL} ref={mapRef}>
+                        <MapContainer
+                            center={center}
+                            zoom={ZOOM_LEVEL}
+                            ref={mapRef}
+                            style={{ height: "100%", width: "100%" }} // Explicitly set height and width
+                        >
                             <TileLayer
                                 url={osm.maptiler.url}
                                 attribution={osm.maptiler.attribution}

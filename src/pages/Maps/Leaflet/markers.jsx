@@ -1,13 +1,9 @@
 import React, { useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-
 import "leaflet/dist/leaflet.css";
 import osm from "./osm-providers";
-
-import Header from "../components/Header";
 import cities from "./cities.json";
-import ExternalInfo from "../components/ExternalInfo";
 
 const markerIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
@@ -22,40 +18,31 @@ const MarkersMap = () => {
   const mapRef = useRef();
 
   return (
-    <>
-      <Header title="React Leaflet Map Example" />
+    <MapContainer
+      center={center}
+      zoom={ZOOM_LEVEL}
+      ref={mapRef}
+      style={{ height: "100%", width: "100%" }} // Explicitly set height and width
+    >
+      <TileLayer
+        url={osm.maptiler.url}
+        attribution={osm.maptiler.attribution}
+      />
 
-      <ExternalInfo page="leafletMarker" />
-
-      <div className="row">
-        <div className="col text-center">
-          <h2>React-leaflet - Adding Markers to react leaflet</h2>
-          <p>Loading basic map using layer from maptiler</p>
-          <div className="col">
-            <MapContainer center={center} zoom={ZOOM_LEVEL} ref={mapRef}>
-              <TileLayer
-                url={osm.maptiler.url}
-                attribution={osm.maptiler.attribution}
-              />
-
-              {cities.map((city, idx) => (
-                <Marker
-                  position={[city.lat, city.lng]}
-                  icon={markerIcon}
-                  key={idx}
-                >
-                  <Popup>
-                    <b>
-                      {city.city}, {city.country}
-                    </b>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
-          </div>
-        </div>
-      </div>
-    </>
+      {cities.map((city, idx) => (
+        <Marker
+          position={[city.lat, city.lng]}
+          icon={markerIcon}
+          key={idx}
+        >
+          <Popup>
+            <b>
+              {city.city}, {city.country}
+            </b>
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   );
 };
 
