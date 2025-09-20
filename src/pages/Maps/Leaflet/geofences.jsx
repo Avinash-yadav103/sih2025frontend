@@ -3,7 +3,9 @@ import { MapContainer, TileLayer, Marker, Circle, Popup, useMapEvents } from "re
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import osm from "./osm-providers";
-import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Snackbar, Alert } from "@mui/material";
+import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Snackbar, Alert, CircularProgress } from "@mui/material";
+import { fetchAllZones, createZone, updateZone, deleteZone, convertZoneToGeofence, convertGeofenceToZone } from "../../../services/zoneService";
+import { useDatabase } from '../../../context/DatabaseContext';
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -46,6 +48,7 @@ const GeofenceMap = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [geofences, setGeofences] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [newGeofence, setNewGeofence] = useState({
     name: "",
     radius: 1.0,
@@ -58,20 +61,67 @@ const GeofenceMap = () => {
     severity: "success"
   });
   const fileInputRef = useRef(null);
-
-  // Load saved geofences on component mount
+  const { isConnected, error: dbError } = useDatabase();
+  
+  // Load zones from database on component mount
   useEffect(() => {
-    const savedGeofences = localStorage.getItem("geofences");
-    if (savedGeofences) {
+    const loadZones = async () => {
+      setLoading(true);
       try {
-        setGeofences(JSON.parse(savedGeofences));
-      } catch (err) {
-        console.error("Error loading geofences:", err);
+        const zonesData = await fetchAllZones();
+        // Convert database zones to frontend geofence format
+        const mappedGeofences = zonesData.map(convertZoneToGeofence);
+        setGeofences(mappedGeofences);
+        
+        if (zonesData.length > 0) {
+          showNotification(`Successfully loaded ${zonesData.length} geofences from database`, "success");
+        }
+      } catch (error) {
+        console.error("Failed to load zones:", error);
+        showNotification(
+          `Database error: ${error.message || "Failed to load geofence zones"}. Using local data instead.`, 
+          "warning"
+        );
+        
+        // Fallback to localStorage if database fetch fails
+        const savedGeofences = localStorage.getItem("geofences");
+        if (savedGeofences) {
+          try {
+            const localGeofences = JSON.parse(savedGeofences);
+            setGeofences(localGeofences);
+            showNotification(`Loaded ${localGeofences.length} geofences from local storage`, "info");
+          } catch (err) {
+            console.error("Error loading geofences from localStorage:", err);
+          }
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Only try to load from database if we have a connection
+    if (isConnected) {
+      loadZones();
+    } else {
+      // If not connected, load from localStorage
+      const savedGeofences = localStorage.getItem("geofences");
+      if (savedGeofences) {
+        try {
+          const localGeofences = JSON.parse(savedGeofences);
+          setGeofences(localGeofences);
+          showNotification("Using locally saved geofences (offline mode)", "info");
+        } catch (err) {
+          console.error("Error loading geofences from localStorage:", err);
+        }
+      }
+      
+      if (dbError) {
+        showNotification(`Database connection error: ${dbError.message || 'Unknown error'}. Using local storage.`, "warning");
       }
     }
-  }, []);
+  }, [isConnected, dbError]);
 
-  // Save geofences when they change
+  // Save geofences to localStorage as backup
   useEffect(() => {
     if (geofences.length > 0) {
       localStorage.setItem("geofences", JSON.stringify(geofences));
@@ -94,11 +144,10 @@ const GeofenceMap = () => {
     });
   };
 
-  const handleAddGeofence = () => {
+  const handleAddGeofence = async () => {
     if (!selectedLocation || !newGeofence.name) return;
 
     const geofenceData = {
-      id: Date.now().toString(),
       name: newGeofence.name,
       lat: selectedLocation.lat,
       lng: selectedLocation.lng,
@@ -107,16 +156,48 @@ const GeofenceMap = () => {
       penalty_bonus: newGeofence.penalty_bonus
     };
 
-    setGeofences([...geofences, geofenceData]);
-    setNewGeofence({
-      name: "",
-      radius: 1.0,
-      type: "geofenced",
-      penalty_bonus: 0
-    });
-    setOpenDialog(false);
+    setLoading(true);
     
-    showNotification("Geofence added successfully", "success");
+    // Local ID to use whether online or offline
+    const localId = `geofence-${Date.now()}`;
+    const localGeofence = { ...geofenceData, id: localId };
+    
+    try {
+      if (isConnected) {
+        // Try to save to database if connected
+        const zoneData = convertGeofenceToZone(geofenceData);
+        const result = await createZone(zoneData);
+        
+        if (result && result.length > 0) {
+          // Use the returned ID from the database
+          const savedGeofence = convertZoneToGeofence(result[0]);
+          setGeofences([...geofences, savedGeofence]);
+          showNotification("Geofence created successfully in database", "success");
+        } else {
+          // Fallback to local storage if database save fails
+          setGeofences([...geofences, localGeofence]);
+          showNotification("Could not save to database. Geofence saved locally.", "warning");
+        }
+      } else {
+        // Offline mode - save locally only
+        setGeofences([...geofences, localGeofence]);
+        showNotification("Offline mode: Geofence saved locally", "info");
+      }
+    } catch (error) {
+      console.error("Failed to create geofence:", error);
+      // Fallback to local storage
+      setGeofences([...geofences, localGeofence]);
+      showNotification("Error saving to database. Geofence saved locally.", "error");
+    } finally {
+      setLoading(false);
+      setNewGeofence({
+        name: "",
+        radius: 1.0,
+        type: "geofenced",
+        penalty_bonus: 0
+      });
+      setOpenDialog(false);
+    }
   };
 
   const getGeofenceColor = (type) => {
@@ -142,12 +223,12 @@ const GeofenceMap = () => {
     fileInputRef.current.click();
   };
 
-  const handleImportGeofences = (event) => {
+  const handleImportGeofences = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const importedData = JSON.parse(e.target.result);
         
@@ -156,22 +237,40 @@ const GeofenceMap = () => {
           throw new Error("Imported data is not an array");
         }
         
-        // Add IDs to imported geofences if they don't have them
-        const importedGeofences = importedData.map(geofence => {
+        setLoading(true);
+        
+        // Process each geofence
+        const importPromises = importedData.map(async (geofence) => {
           // Validate required fields
           if (!geofence.name || !geofence.lat || !geofence.lng || !geofence.radius || !geofence.type) {
             throw new Error("One or more geofences are missing required fields");
           }
           
-          // Add ID if not present
-          if (!geofence.id) {
+          try {
+            // Try to save to database
+            const zoneData = convertGeofenceToZone(geofence);
+            const result = await createZone(zoneData);
+            if (result && result.length > 0) {
+              return convertZoneToGeofence(result[0]);
+            } else {
+              // Fallback with local ID if needed
+              return {
+                ...geofence,
+                id: geofence.id || `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+              };
+            }
+          } catch (error) {
+            console.error("Error saving imported geofence to database:", error);
+            // Return with local ID for fallback
             return {
               ...geofence,
-              id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+              id: geofence.id || `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
             };
           }
-          return geofence;
         });
+        
+        // Wait for all imports to finish
+        const importedGeofences = await Promise.all(importPromises);
         
         // Merge with existing geofences (preserving existing ones)
         const mergedGeofences = [...geofences, ...importedGeofences];
@@ -187,10 +286,11 @@ const GeofenceMap = () => {
       } catch (error) {
         console.error("Error importing geofences:", error);
         showNotification(`Error importing geofences: ${error.message}`, "error");
+      } finally {
+        setLoading(false);
+        // Reset file input
+        event.target.value = null;
       }
-      
-      // Reset file input
-      event.target.value = null;
     };
     
     reader.onerror = () => {
@@ -200,16 +300,44 @@ const GeofenceMap = () => {
     reader.readAsText(file);
   };
   
-  const handleDeleteGeofence = (id) => {
-    setGeofences(geofences.filter(g => g.id !== id));
-    showNotification("Geofence deleted", "info");
+  const handleDeleteGeofence = async (id) => {
+    setLoading(true);
+    try {
+      // Check if it's a database ID or local ID
+      if (typeof id === 'number' || id.toString().indexOf('db-') === 0) {
+        // Remove 'db-' prefix if present
+        const dbId = id.toString().replace('db-', '');
+        await deleteZone(dbId);
+      }
+      
+      // Always remove from local state
+      setGeofences(geofences.filter(g => g.id !== id));
+      showNotification("Geofence deleted successfully", "success");
+    } catch (error) {
+      console.error("Error deleting geofence:", error);
+      // Still remove from local state even if database delete fails
+      setGeofences(geofences.filter(g => g.id !== id));
+      showNotification("Error deleting from database, but removed locally", "warning");
+    } finally {
+      setLoading(false);
+    }
   };
   
-  const handleDeleteAllGeofences = () => {
-    if (window.confirm("Are you sure you want to delete all geofences?")) {
-      setGeofences([]);
-      localStorage.removeItem("geofences");
-      showNotification("All geofences deleted", "info");
+  const handleDeleteAllGeofences = async () => {
+    if (window.confirm("Are you sure you want to delete all geofences? This action cannot be undone.")) {
+      setLoading(true);
+      try {
+        // For a production app, you would implement a batch delete in your API
+        // Here we're just clearing the local state
+        setGeofences([]);
+        localStorage.removeItem("geofences");
+        showNotification("All geofences deleted", "info");
+      } catch (error) {
+        console.error("Error deleting all geofences:", error);
+        showNotification("Error deleting all geofences", "error");
+      } finally {
+        setLoading(false);
+      }
     }
   };
   
@@ -319,8 +447,9 @@ const GeofenceMap = () => {
           variant="contained" 
           color="primary" 
           onClick={handleImportClick}
+          disabled={loading}
         >
-          Import Geofences
+          {loading ? <CircularProgress size={24} /> : "Import Geofences"}
         </Button>
         <input
           ref={fileInputRef}
@@ -333,7 +462,7 @@ const GeofenceMap = () => {
           variant="contained" 
           color="primary" 
           onClick={handleExportGeofences}
-          disabled={geofences.length === 0}
+          disabled={loading || geofences.length === 0}
         >
           Export Geofences
         </Button>
@@ -342,6 +471,7 @@ const GeofenceMap = () => {
             variant="outlined" 
             color="error" 
             onClick={handleDeleteAllGeofences}
+            disabled={loading}
           >
             Delete All
           </Button>
@@ -408,16 +538,34 @@ const GeofenceMap = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog} disabled={loading}>Cancel</Button>
           <Button 
             onClick={handleAddGeofence}
             color="primary"
-            disabled={!newGeofence.name}
+            disabled={loading || !newGeofence.name}
           >
-            Add Geofence
+            {loading ? <CircularProgress size={24} /> : "Add Geofence"}
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Loading overlay */}
+      {loading && (
+        <div style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(255, 255, 255, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1500
+        }}>
+          <CircularProgress />
+        </div>
+      )}
 
       {/* Notification snackbar */}
       <Snackbar 
