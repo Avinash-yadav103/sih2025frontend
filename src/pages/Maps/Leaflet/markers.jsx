@@ -1,97 +1,135 @@
-import React, { useState, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import osm from "./osm-providers";
-import cities from "./cities.json";
+import React, { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import osm from './osm-providers';
 
-// Define different marker icons
-const touristIcon = new L.Icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+// Fix for default marker icon issue in leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
-const incidentIcon = new L.Icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
+// Create custom icons for different types of markers
+const createCustomIcon = (type) => {
+  let iconUrl, iconSize;
+  
+  switch(type) {
+    case 'tourist':
+      iconUrl = 'https://cdn-icons-png.flaticon.com/512/3789/3789806.png';
+      iconSize = [32, 32];
+      break;
+    case 'incident':
+      iconUrl = 'https://cdn-icons-png.flaticon.com/512/5605/5605866.png';
+      iconSize = [32, 32];
+      break;
+    case 'unit':
+      iconUrl = 'https://cdn-icons-png.flaticon.com/512/1350/1350675.png';
+      iconSize = [32, 32];
+      break;
+    case 'iot':
+      iconUrl = 'https://cdn-icons-png.flaticon.com/512/2885/2885417.png';
+      iconSize = [24, 24];
+      break;
+    default:
+      iconUrl = 'https://cdn-icons-png.flaticon.com/512/447/447031.png';
+      iconSize = [32, 32];
+  }
 
-const unitIcon = new L.Icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
+  return new L.Icon({
+    iconUrl,
+    iconSize,
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
+};
 
-// Sample data with enriched information
-const enrichedData = cities.map((city, idx) => ({
-  ...city,
-  id: idx,
-  type: idx % 3 === 0 ? 'tourist' : idx % 3 === 1 ? 'incident' : 'unit',
-  title: `${city.city}, ${city.country}`,
-  address: `${city.city}, ${city.country}`,
-  status: idx % 3 === 0 ? 'Active' : 'Inactive',
-  nationality: idx % 3 === 0 ? 'Indian' : 'Foreign',
-  contact: '+91 9876543210',
-  lastCheckIn: '2 hours ago',
-  severity: idx % 3 === 1 ? (idx % 2 === 0 ? 'High' : 'Medium') : 'Low',
-  reportTime: '30 minutes ago',
-  description: 'Tourist reported suspicious activity in the area.'
-}));
-
-const MarkersMap = ({ onMarkerClick }) => {
-  const [center] = useState({ lat: 13.084622, lng: 80.248357 });
-  const ZOOM_LEVEL = 9;
-  const mapRef = useRef();
-
-  const handleMarkerClick = (marker) => {
-    if (onMarkerClick) {
-      onMarkerClick(marker);
+const MarkersMap = ({ onMarkerClick, onMapReady }) => {
+  const [mapInstance, setMapInstance] = useState(null);
+  
+  // Sample markers data - in a real app, this would come from an API
+  const markers = [
+    {
+      id: 1,
+      position: [27.3389, 88.6138],
+      title: 'Tourist Group 1',
+      address: 'MG Road, Gangtok, Sikkim',
+      type: 'tourist',
+      status: 'Active',
+      nationality: 'Japanese',
+      contact: '+81-555-123-4567',
+      lastCheckIn: '2 hours ago',
+      category: 'tourist'
+    },
+    {
+      id: 2,
+      position: [27.3380, 88.6145],
+      title: 'Missing Tourist Report',
+      address: 'Gangtok Market, Sikkim',
+      type: 'incident',
+      severity: 'High',
+      reportTime: '1 hour ago',
+      description: 'Tourist not reported back from trekking',
+      category: 'incident'
+    },
+    {
+      id: 3,
+      position: [27.3400, 88.6100],
+      title: 'Patrol Unit 3',
+      address: 'Central Gangtok',
+      type: 'unit',
+      status: 'On duty',
+      officers: '3 officers',
+      vehicle: 'Jeep #4221',
+      category: 'unit'
+    },
+    {
+      id: 4,
+      position: [27.3395, 88.6130],
+      title: 'CCTV Camera #5',
+      address: 'MG Road Junction',
+      type: 'iot',
+      status: 'Active',
+      lastPing: '5 minutes ago',
+      category: 'iot'
     }
-  };
+  ];
 
-  const getMarkerIcon = (type) => {
-    switch(type) {
-      case 'tourist':
-        return touristIcon;
-      case 'incident':
-        return incidentIcon;
-      case 'unit':
-        return unitIcon;
-      default:
-        return touristIcon;
+  // Pass map reference to parent when it's available
+  useEffect(() => {
+    if (mapInstance && onMapReady) {
+      onMapReady(mapInstance);
     }
-  };
+  }, [mapInstance, onMapReady]);
 
   return (
     <MapContainer
-      center={center}
-      zoom={ZOOM_LEVEL}
-      ref={mapRef}
-      style={{ height: "100%", width: "100%" }}
+      center={[27.3389, 88.6138]}
+      zoom={14}
+      style={{ height: '100%', width: '100%' }}
+      whenCreated={setMapInstance}
     >
       <TileLayer
         url={osm.maptiler.url}
         attribution={osm.maptiler.attribution}
       />
-
-      {enrichedData.map((marker) => (
+      
+      {markers.map((marker) => (
         <Marker
           key={marker.id}
-          position={[marker.lat, marker.lng]}
-          icon={getMarkerIcon(marker.type)}
+          position={marker.position}
+          icon={createCustomIcon(marker.type)}
           eventHandlers={{
-            click: () => handleMarkerClick(marker),
+            click: () => onMarkerClick(marker),
           }}
         >
           <Popup>
-            <b>{marker.title}</b>
-            <p>{marker.type === 'tourist' ? 'Tourist' : marker.type === 'incident' ? 'Incident' : 'Unit'}</p>
-            <button onClick={() => handleMarkerClick(marker)}>View Details</button>
+            <div>
+              <h3>{marker.title}</h3>
+              <p>{marker.address}</p>
+            </div>
           </Popup>
         </Marker>
       ))}

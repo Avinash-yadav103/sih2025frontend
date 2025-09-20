@@ -6,12 +6,12 @@
   overflow: hidden;
 }
 
-/* Google Style Search Bar */
+/* Google Style Search Bar - Improved width and positioning */
 .search-container {
   position: absolute;
   top: 16px;
-  left: 0;
-  right: 0;
+  left: 50px;
+  right: 50px;
   z-index: 1000;
   display: flex;
   justify-content: center;
@@ -22,15 +22,18 @@
   align-items: center;
   background-color: #fff;
   border-radius: 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  padding: 0px 16px;
-  width: 40%;
-  max-width: 600px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 0 16px;
+  width: 60%;  /* Increased from 40% to 60% */
+  min-width: 450px;
+  max-width: 800px; /* Increased from 600px to 800px */
+  height: 48px; /* Fixed height for better appearance */
 }
 
 .search-bar.google-style .search-icon {
   color: #5F6368;
   margin-right: 12px;
+  font-size: 20px;
 }
 
 .search-bar.google-style input {
@@ -39,6 +42,13 @@
   width: 100%;
   font-size: 16px;
   color: #3c4043;
+  height: 100%;
+  background: transparent;
+  padding: 0;
+}
+
+.search-results{
+  width: 40vw;
 }
 
 /* Category Buttons - Google Style */
@@ -307,27 +317,24 @@
   display: flex;
   justify-content: center;
   margin-bottom: 15px;
+  margin-top: 60px; /* Add space below search bar */
 }
 
 .map-type-controls button {
   background-color: white;
-  border: 1px solid #ddd;
-  padding: 8px 15px;
-  margin: 0;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  margin: 0 4px;
   font-size: 14px;
   cursor: pointer;
-}
-
-.map-type-controls button:first-child {
-  border-radius: 4px 0 0 4px;
-}
-
-.map-type-controls button:last-child {
-  border-radius: 0 4px 4px 0;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
+  color: #3c4043;
+  font-weight: 500;
 }
 
 .map-type-controls button.active {
-  background-color: #1976d2;
+  background-color: #1a73e8;
   color: white;
   font-weight: 500;
 }
@@ -435,13 +442,34 @@
 }
 
 /* Media queries for responsiveness */
+@media (max-width: 992px) {
+  .search-bar.google-style {
+    width: 80%;
+    min-width: 300px;
+  }
+}
+
 @media (max-width: 768px) {
   .search-container {
-    width: calc(100% - 20px);
+    left: 20px;
+    right: 20px;
   }
   
-  .category-buttons.google-style {
-    width: calc(100% - 20px);
+  .search-bar.google-style {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .map-type-controls {
+    margin-top: 70px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .map-type-controls::-webkit-scrollbar {
+    display: none;
   }
 }
 

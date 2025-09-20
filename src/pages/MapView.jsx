@@ -1,12 +1,16 @@
-import React, { useState } from 'react'
-import { Box, Button, IconButton, InputAdornment, TextField, Typography, Chip } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'
+import React, { useState, useEffect } from 'react'
+import { Box, Button, IconButton } from '@mui/material'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import ZoomOutIcon from '@mui/icons-material/ZoomOut'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
 import LayersIcon from '@mui/icons-material/Layers'
 import CloseIcon from '@mui/icons-material/Close'
 import './MapView.css'
+
+// Import search components
+import SearchBar from '../components/search/SearchBar'
+import SearchCategoryFilters from '../components/search/SearchCategoryFilters'
+import useSearch from '../hooks/useSearch'
 
 // Import Leaflet components
 import BasicMap from './Maps/Leaflet/basic'
@@ -17,52 +21,95 @@ import DrawMap from './Maps/Leaflet/draw'
 
 function MapView() {
   const [activeMap, setActiveMap] = useState('markers')
-  const [activeCategory, setActiveCategory] = useState(null)
   const [selectedMarker, setSelectedMarker] = useState(null)
+  const [mapRef, setMapRef] = useState(null)
+  
+  // Use our custom search hook
+  const { 
+    query, 
+    setQuery, 
+    results, 
+    loading, 
+    selectedResult, 
+    setSelectedResult,
+    activeCategories,
+    toggleCategory,
+    clearSearch
+  } = useSearch();
 
-  const renderMap = () => {
-    switch (activeMap) {
-      case 'standard':
-        return <BasicMap />
-      case 'markers':
-        return <MarkersMap onMarkerClick={handleMarkerClick} />
-      case 'location':
-        return <CurrentLocation />
-      case 'geofences':
-        return <GeofenceMap />
-      case 'draw':
-        return <DrawMap />
-      default:
-        return <MarkersMap onMarkerClick={handleMarkerClick} />
+  // Handle marker click from map
+  const handleMarkerClick = (marker) => {
+    setSelectedMarker(marker)
+    setSelectedResult(null) // Clear search result when clicking a map marker
+  }
+
+  // Handle search result selection
+  const handleSearchResultSelect = (result) => {
+    setSelectedMarker(result) // Use the result as the selected marker
+    
+    // Center map on the selected result
+    if (mapRef && result.position) {
+      mapRef.setView(result.position, 15) // Set zoom level to 15
+      
+      // If we're not already in markers view, switch to it
+      if (activeMap !== 'markers') {
+        setActiveMap('markers')
+      }
     }
   }
 
-  const handleMarkerClick = (marker) => {
-    setSelectedMarker(marker)
+  // Set up map reference from child components
+  const handleMapReference = (map) => {
+    setMapRef(map)
   }
 
+  // Close info card
   const closeInfoCard = () => {
     setSelectedMarker(null)
   }
 
+  // Render the appropriate map based on activeMap state
+  const renderMap = () => {
+    switch (activeMap) {
+      case 'standard':
+        return <BasicMap onMapReady={handleMapReference} />
+      case 'markers':
+        return <MarkersMap onMapReady={handleMapReference} onMarkerClick={handleMarkerClick} />
+      case 'location':
+        return <CurrentLocation onMapReady={handleMapReference} />
+      case 'geofences':
+        return <GeofenceMap onMapReady={handleMapReference} />
+      case 'draw':
+        return <DrawMap onMapReady={handleMapReference} />
+      default:
+        return <MarkersMap onMapReady={handleMapReference} onMarkerClick={handleMarkerClick} />
+    }
+  }
+
+  // Update map when selectedResult changes
+  useEffect(() => {
+    if (selectedResult && mapRef && selectedResult.position) {
+      mapRef.setView(selectedResult.position, 15)
+    }
+  }, [selectedResult, mapRef])
+
   return (
     <div className="full-map-container">
-      {/* Search Bar */}
+      {/* Search Bar - Positioned for better visibility */}
       <div className="search-container">
-        <div className="search-bar google-style">
-          <SearchIcon className="search-icon" />
-          <TextField 
-            fullWidth
-            variant="standard"
-            placeholder="Search tourists, incidents, locations"
-            InputProps={{
-              disableUnderline: true,
-            }}
-          />
-        </div>
+        <SearchBar 
+          query={query}
+          setQuery={setQuery}
+          results={results}
+          loading={loading}
+          selectedResult={selectedResult}
+          setSelectedResult={setSelectedResult}
+          clearSearch={clearSearch}
+          onResultSelect={handleSearchResultSelect}
+        />
       </div>
 
-      {/* Map Controls Container */}
+      {/* Map Controls Container - Positioned below search */}
       <div className="map-controls-container">
         {/* Map Type Buttons */}
         <div className="map-type-controls">
@@ -97,58 +144,37 @@ function MapView() {
             Geofence
           </Button>
         </div>
-
-        {/* Layer Toggle Buttons - Placeholder for future implementation */}
-        <div className="map-layer-controls">
-          {/* Add layer toggle buttons here if needed */}
-        </div>
       </div>
-
-      {/* Filter Chips */}
-      <div className="filter-chips">
-        <Button 
-          className={activeCategory === 'tourists' ? 'active' : ''}
-          onClick={() => setActiveCategory(activeCategory === 'tourists' ? null : 'tourists')}
-        >
-          <span className="icon">👤</span> Tourists
-        </Button>
-        <Button 
-          className={activeCategory === 'incidents' ? 'active' : ''}
-          onClick={() => setActiveCategory(activeCategory === 'incidents' ? null : 'incidents')}
-        >
-          <span className="icon">🚨</span> Incidents
-        </Button>
-        <Button 
-          className={activeCategory === 'units' ? 'active' : ''}
-          onClick={() => setActiveCategory(activeCategory === 'units' ? null : 'units')}
-        >
-          <span className="icon">🚔</span> Units
-        </Button>
-        <Button 
-          className={activeCategory === 'geofences' ? 'active' : ''}
-          onClick={() => setActiveCategory(activeCategory === 'geofences' ? null : 'geofences')}
-        >
-          <span className="icon">🔶</span> Geofences
-        </Button>
-        <Button 
-          className={activeCategory === 'iot' ? 'active' : ''}
-          onClick={() => setActiveCategory(activeCategory === 'iot' ? null : 'iot')}
-        >
-          <span className="icon">📱</span> IoT Devices
-        </Button>
-      </div>
+      
+      {/* Only render category filters if we have search results */}
+      {results.length > 0 && (
+        <SearchCategoryFilters 
+          activeCategories={activeCategories}
+          toggleCategory={toggleCategory}
+        />
+      )}
 
       {/* Map Controls - Floating */}
       <div className="floating-controls">
         <div className="map-control-group">
-          <button className="map-control-button">
+          <button className="map-control-button" onClick={() => mapRef && mapRef.zoomIn()}>
             <ZoomInIcon />
           </button>
-          <button className="map-control-button">
+          <button className="map-control-button" onClick={() => mapRef && mapRef.zoomOut()}>
             <ZoomOutIcon />
           </button>
         </div>
-        <button className="map-control-button">
+        <button 
+          className="map-control-button" 
+          onClick={() => {
+            if (mapRef && navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition((position) => {
+                const { latitude, longitude } = position.coords
+                mapRef.setView([latitude, longitude], 15)
+              })
+            }
+          }}
+        >
           <MyLocationIcon />
         </button>
         <button className="map-control-button">
@@ -169,9 +195,9 @@ function MapView() {
           <div className="info-content">
             <p className="info-address">{selectedMarker.address}</p>
             
-            {selectedMarker.type === 'incident' && (
+            {selectedMarker.category === 'incident' && (
               <>
-                <div className={`incident-severity ${selectedMarker.severity.toLowerCase()}`}>
+                <div className={`incident-severity ${selectedMarker.severity?.toLowerCase()}`}>
                   {selectedMarker.severity}
                 </div>
                 <p>Reported: {selectedMarker.reportTime}</p>
@@ -179,7 +205,7 @@ function MapView() {
               </>
             )}
             
-            {selectedMarker.type === 'tourist' && (
+            {selectedMarker.category === 'tourist' && (
               <>
                 <p>Status: {selectedMarker.status}</p>
                 <p>Nationality: {selectedMarker.nationality}</p>
@@ -188,12 +214,35 @@ function MapView() {
               </>
             )}
             
+            {selectedMarker.category === 'unit' && (
+              <>
+                <p>Status: {selectedMarker.status}</p>
+                <p>Officers: {selectedMarker.officers}</p>
+                <p>Vehicle: {selectedMarker.vehicle}</p>
+              </>
+            )}
+            
+            {selectedMarker.category === 'iot' && (
+              <>
+                <p>Type: {selectedMarker.type}</p>
+                <p>Status: {selectedMarker.status}</p>
+                <p>Last Ping: {selectedMarker.lastPing}</p>
+              </>
+            )}
+            
             <div className="action-buttons">
-              <button className="primary-action">
+              <button 
+                className="primary-action"
+                onClick={() => {
+                  if (mapRef && selectedMarker.position) {
+                    mapRef.setView(selectedMarker.position, 18)
+                  }
+                }}
+              >
                 Get Directions
               </button>
               <button className="secondary-action">
-                {selectedMarker.type === 'incident' ? 'Dispatch Unit' : 'View Details'}
+                {selectedMarker.category === 'incident' ? 'Dispatch Unit' : 'View Details'}
               </button>
             </div>
           </div>
