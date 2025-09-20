@@ -1,0 +1,98 @@
+.map-view-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.map-options {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+}
+
+.controls-toggle {
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.controls-toggle:hover {
+  background-color: #f5f5f5;
+}
+
+.controls-panel {
+  margin-top: 10px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 180px;
+}
+
+.controls-panel button {
+  margin: 5px 0;
+  padding: 8px;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.controls-panel button:hover {
+  background-color: #f0f0f0;
+}
+
+.controls-panel button.active {
+  background-color: #e3f2fd;
+  color: #1a73e8;
+}
+
+.full-map-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Override leaflet map styles to look more like Google Maps */
+.leaflet-container {
+  font-family: 'Roboto', Arial, sans-serif;
+}
+
+.leaflet-control-zoom {
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: white !important;
+  color: #666 !important;
+  border: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #f5f5f5 !important;
+  color: #333 !important;
+}
+
+.leaflet-control-attribution {
+  font-size: 11px !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  padding: 2px 8px !important;
+}
