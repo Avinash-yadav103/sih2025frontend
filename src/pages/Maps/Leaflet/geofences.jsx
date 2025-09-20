@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Circle, Popup, useMapEvents } from "re
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import osm from "./osm-providers";
-import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem } from "@mui/material";
+import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Snackbar, Alert } from "@mui/material";
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -52,6 +52,12 @@ const GeofenceMap = () => {
     type: "geofenced",
     penalty_bonus: 0
   });
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success"
+  });
+  const fileInputRef = useRef(null);
 
   // Load saved geofences on component mount
   useEffect(() => {
@@ -109,6 +115,8 @@ const GeofenceMap = () => {
       penalty_bonus: 0
     });
     setOpenDialog(false);
+    
+    showNotification("Geofence added successfully", "success");
   };
 
   const getGeofenceColor = (type) => {
@@ -126,6 +134,98 @@ const GeofenceMap = () => {
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
+    
+    showNotification("Geofences exported successfully", "success");
+  };
+  
+  const handleImportClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImportGeofences = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        
+        // Validate imported data
+        if (!Array.isArray(importedData)) {
+          throw new Error("Imported data is not an array");
+        }
+        
+        // Add IDs to imported geofences if they don't have them
+        const importedGeofences = importedData.map(geofence => {
+          // Validate required fields
+          if (!geofence.name || !geofence.lat || !geofence.lng || !geofence.radius || !geofence.type) {
+            throw new Error("One or more geofences are missing required fields");
+          }
+          
+          // Add ID if not present
+          if (!geofence.id) {
+            return {
+              ...geofence,
+              id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+            };
+          }
+          return geofence;
+        });
+        
+        // Merge with existing geofences (preserving existing ones)
+        const mergedGeofences = [...geofences, ...importedGeofences];
+        setGeofences(mergedGeofences);
+        
+        // Find map bounds to fit all geofences
+        if (importedGeofences.length > 0 && mapRef.current) {
+          const bounds = L.latLngBounds(importedGeofences.map(g => [g.lat, g.lng]));
+          mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+        }
+        
+        showNotification(`Successfully imported ${importedGeofences.length} geofences`, "success");
+      } catch (error) {
+        console.error("Error importing geofences:", error);
+        showNotification(`Error importing geofences: ${error.message}`, "error");
+      }
+      
+      // Reset file input
+      event.target.value = null;
+    };
+    
+    reader.onerror = () => {
+      showNotification("Error reading file", "error");
+    };
+    
+    reader.readAsText(file);
+  };
+  
+  const handleDeleteGeofence = (id) => {
+    setGeofences(geofences.filter(g => g.id !== id));
+    showNotification("Geofence deleted", "info");
+  };
+  
+  const handleDeleteAllGeofences = () => {
+    if (window.confirm("Are you sure you want to delete all geofences?")) {
+      setGeofences([]);
+      localStorage.removeItem("geofences");
+      showNotification("All geofences deleted", "info");
+    }
+  };
+  
+  const showNotification = (message, severity) => {
+    setNotification({
+      open: true,
+      message,
+      severity
+    });
+  };
+  
+  const handleCloseNotification = () => {
+    setNotification({
+      ...notification,
+      open: false
+    });
   };
 
   return (
@@ -149,6 +249,7 @@ const GeofenceMap = () => {
           <Marker position={[selectedLocation.lat, selectedLocation.lng]}>
             <Popup>
               <div>
+                <h4>Selected Location</h4>
                 <p>Latitude: {selectedLocation.lat.toFixed(6)}</p>
                 <p>Longitude: {selectedLocation.lng.toFixed(6)}</p>
                 <Button variant="contained" color="primary" onClick={handleOpenDialog}>
@@ -171,6 +272,14 @@ const GeofenceMap = () => {
                   <p>Penalty/Bonus: {geofence.penalty_bonus}</p>
                   <p>Latitude: {geofence.lat.toFixed(6)}</p>
                   <p>Longitude: {geofence.lng.toFixed(6)}</p>
+                  <Button 
+                    variant="outlined" 
+                    color="error" 
+                    size="small"
+                    onClick={() => handleDeleteGeofence(geofence.id)}
+                  >
+                    Delete
+                  </Button>
                 </div>
               </Popup>
             </Marker>
@@ -196,8 +305,30 @@ const GeofenceMap = () => {
         ))}
       </MapContainer>
 
-      {/* Controls for export functionality */}
-      <div style={{ position: "absolute", top: "180px", right: "10px", zIndex: 1000 }}>
+      {/* Controls for import/export functionality */}
+      <div style={{ 
+        position: "absolute", 
+        top: "180px", 
+        right: "10px", 
+        zIndex: 1000,
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px"
+      }}>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleImportClick}
+        >
+          Import Geofences
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          style={{ display: 'none' }}
+          onChange={handleImportGeofences}
+        />
         <Button 
           variant="contained" 
           color="primary" 
@@ -206,6 +337,15 @@ const GeofenceMap = () => {
         >
           Export Geofences
         </Button>
+        {geofences.length > 0 && (
+          <Button 
+            variant="outlined" 
+            color="error" 
+            onClick={handleDeleteAllGeofences}
+          >
+            Delete All
+          </Button>
+        )}
       </div>
 
       {/* Dialog for adding a new geofence */}
@@ -278,6 +418,18 @@ const GeofenceMap = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Notification snackbar */}
+      <Snackbar 
+        open={notification.open} 
+        autoHideDuration={4000} 
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseNotification} severity={notification.severity}>
+          {notification.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
