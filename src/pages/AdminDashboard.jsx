@@ -28,6 +28,10 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import EventIcon from '@mui/icons-material/Event';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -98,6 +102,40 @@ function AdminDashboard() {
       { day: 1, plan: '' }
     ]
   });
+
+  // Sample tourist data for Manage Tourists section
+  const [tourists, setTourists] = useState([
+    {
+      id: 'T001',
+      name: 'John Smith',
+      nationality: 'American',
+      phone: '+1-555-123456',
+      tripName: 'Assam Wildlife Tour',
+      startDate: '2025-09-20',
+      endDate: '2025-09-25',
+      status: 'Active'
+    },
+    {
+      id: 'T002',
+      name: 'Priya Sharma',
+      nationality: 'Indian',
+      phone: '+91-9876543210',
+      tripName: 'Meghalaya Village Visit',
+      startDate: '2025-09-18',
+      endDate: '2025-09-22',
+      status: 'Active'
+    },
+    {
+      id: 'T003',
+      name: 'Takashi Yamamoto',
+      nationality: 'Japanese',
+      phone: '+81-90-1234-5678',
+      tripName: 'Nagaland Festival',
+      startDate: '2025-09-15',
+      endDate: '2025-09-21',
+      status: 'Completed'
+    }
+  ]);
 
   useEffect(() => {
     // Check if user is authenticated, redirect if not
@@ -282,8 +320,7 @@ function AdminDashboard() {
       { id: 'overview', label: 'Overview', icon: <DashboardIcon /> },
       { id: 'tourists', label: 'Register Tourist', icon: <PersonAddIcon /> },
       { id: 'manage', label: 'Manage Tourists', icon: <PeopleIcon /> },
-      { id: 'alerts', label: 'Emergency Alerts', icon: <NotificationsActiveIcon /> },
-      { id: 'reports', label: 'Reports', icon: <AssessmentIcon /> },
+      // Removed Emergency Alerts and Reports
       { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
     ];
 
@@ -307,9 +344,6 @@ function AdminDashboard() {
             >
               <div className="sidebar-icon">{item.icon}</div>
               <div className="sidebar-label">{item.label}</div>
-              {item.id === 'alerts' && notificationCount > 0 && (
-                <Badge badgeContent={notificationCount} color="error" className="sidebar-badge" />
-              )}
             </div>
           ))}
         </nav>
@@ -450,6 +484,15 @@ function AdminDashboard() {
   const renderRegistrationForm = () => {
     const steps = ['Personal Details', 'Document Details', 'Itinerary'];
 
+    // Icon mapping for personal details
+    const personalIcons = {
+      fullName: <PersonOutlineIcon sx={{ color: '#b0b0b0', mr: 2 }} />,
+      email: <LocalOfferIcon sx={{ color: '#b0b0b0', mr: 2 }} />,
+      phone: <BusinessCenterIcon sx={{ color: '#b0b0b0', mr: 2 }} />,
+      nationality: <EventIcon sx={{ color: '#b0b0b0', mr: 2 }} />,
+      emergencyContact: <EditNoteIcon sx={{ color: '#b0b0b0', mr: 2 }} />
+    };
+
     return (
       <>
         <div className="tab-header">
@@ -459,8 +502,17 @@ function AdminDashboard() {
           </Typography>
         </div>
         
-        <Paper className="form-container">
-          <Stepper activeStep={formStep} className="form-stepper">
+        <Paper className="form-container" sx={{
+          maxWidth: 700,
+          mx: 'auto',
+          mt: 3,
+          borderRadius: 3,
+          bgcolor: '#f8f9fb',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+          p: 3,
+          border: '1px solid #eaeaea'
+        }}>
+          <Stepper activeStep={formStep} className="form-stepper" sx={{ mb: 3 }}>
             {steps.map((label) => (
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
@@ -471,133 +523,162 @@ function AdminDashboard() {
           <form onSubmit={handleSubmit} className="registration-form">
             {formStep === 0 && (
               <div className="form-step">
-                <Typography variant="h6" className="form-section-title">Personal Details</Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={6}>
+                <Typography variant="h6" className="form-section-title" sx={{ mb: 2 }}>Personal Details</Typography>
+                <Box>
+                  {/* Full Name */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    {personalIcons.fullName}
                     <TextField
-                      fullWidth
-                      label="Full Name"
+                      variant="standard"
+                      placeholder="Full Name"
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleInputChange}
-                      variant="outlined"
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: { bgcolor: 'transparent', fontSize: 18, color: '#003380', fontWeight: 500 }
+                      }}
+                      fullWidth
                       required
                     />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
+                  </Box>
+                  {/* Email */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    {personalIcons.email}
                     <TextField
-                      fullWidth
-                      label="Email Address"
+                      variant="standard"
+                      placeholder="Email Address"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      variant="outlined"
                       type="email"
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: { bgcolor: 'transparent', fontSize: 18, color: '#003380', fontWeight: 500 }
+                      }}
+                      fullWidth
                       required
                     />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
+                  </Box>
+                  {/* Phone */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    {personalIcons.phone}
                     <TextField
-                      fullWidth
-                      label="Phone Number"
+                      variant="standard"
+                      placeholder="Phone Number"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      variant="outlined"
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: { bgcolor: 'transparent', fontSize: 18, color: '#003380', fontWeight: 500 }
+                      }}
+                      fullWidth
                       required
                     />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <FormControl fullWidth variant="outlined">
-                      <InputLabel>Nationality</InputLabel>
+                  </Box>
+                  {/* Nationality */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    {personalIcons.nationality}
+                    <FormControl variant="standard" fullWidth>
                       <Select
-                        label="Nationality"
                         name="nationality"
                         value={formData.nationality}
                         onChange={handleInputChange}
+                        disableUnderline
+                        displayEmpty
+                        sx={{ fontSize: 18, color: '#003380', fontWeight: 500, bgcolor: 'transparent' }}
                         required
                       >
-                        <MenuItem value="">Select Nationality</MenuItem>
+                        <MenuItem value=""><em>Select Nationality</em></MenuItem>
                         <MenuItem value="indian">Indian</MenuItem>
                         <MenuItem value="foreigner">Foreigner</MenuItem>
                       </Select>
                     </FormControl>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
+                  </Box>
+                  {/* Emergency Contact */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                    {personalIcons.emergencyContact}
                     <TextField
-                      fullWidth
-                      label="Password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      variant="outlined"
-                      type="password"
-                      required
-                      helperText="Create password for tourist login"
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Emergency Contact"
+                      variant="standard"
+                      placeholder="Emergency Contact"
                       name="emergencyContact"
                       value={formData.emergencyContact}
                       onChange={handleInputChange}
-                      variant="outlined"
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: { bgcolor: 'transparent', fontSize: 18, color: '#003380', fontWeight: 500 }
+                      }}
+                      fullWidth
                       required
                     />
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
               </div>
             )}
             
             {formStep === 1 && (
               <div className="form-step">
-                <Typography variant="h6" className="form-section-title">Document Details</Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth variant="outlined">
-                      <InputLabel>ID Type</InputLabel>
+                <Typography variant="h6" className="form-section-title" sx={{ mb: 2 }}>Document Details</Typography>
+                <Box>
+                  {/* ID Type */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    <LocalOfferIcon sx={{ color: '#b0b0b0', mr: 2 }} />
+                    <FormControl variant="standard" fullWidth>
                       <Select
-                        label="ID Type"
                         name="idType"
                         value={formData.idType}
                         onChange={handleInputChange}
+                        disableUnderline
+                        displayEmpty
+                        sx={{ fontSize: 18, color: '#003380', fontWeight: 500, bgcolor: 'transparent' }}
                         required
                       >
-                        <MenuItem value="">Select ID Type</MenuItem>
+                        <MenuItem value=""><em>Select ID Type</em></MenuItem>
                         <MenuItem value="aadhar">Aadhar Card</MenuItem>
                         <MenuItem value="passport">Passport</MenuItem>
                         <MenuItem value="driving">Driving License</MenuItem>
                         <MenuItem value="voter">Voter ID</MenuItem>
                       </Select>
                     </FormControl>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
+                  </Box>
+                  {/* ID Number */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    <BusinessCenterIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <TextField
-                      fullWidth
-                      label="ID Number"
+                      variant="standard"
+                      placeholder="ID Number"
                       name="idNumber"
                       value={formData.idNumber}
                       onChange={handleInputChange}
-                      variant="outlined"
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: { bgcolor: 'transparent', fontSize: 18, color: '#003380', fontWeight: 500 }
+                      }}
+                      fullWidth
                       required
                     />
-                  </Grid>
-                  <Grid item xs={12}>
+                  </Box>
+                  {/* KYC ID */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    <EventIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <TextField
-                      fullWidth
-                      label="KYC ID"
+                      variant="standard"
+                      placeholder="KYC ID (optional)"
                       name="kycId"
                       value={formData.kycId}
                       onChange={handleInputChange}
-                      variant="outlined"
-                      helperText="Enter the KYC identifier if available"
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: { bgcolor: 'transparent', fontSize: 18, color: '#003380', fontWeight: 500 }
+                      }}
+                      fullWidth
                     />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <div className="document-upload">
-                      <Typography variant="subtitle1" gutterBottom>Upload ID Document</Typography>
+                  </Box>
+                  {/* Document Upload */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
+                    <EditNoteIcon sx={{ color: '#b0b0b0', mr: 2 }} />
+                    <Box sx={{ flexGrow: 1 }}>
                       <input 
                         type="file" 
                         ref={fileInputRef}
@@ -609,116 +690,147 @@ function AdminDashboard() {
                         variant="outlined" 
                         onClick={handleChooseFile}
                         startIcon={<AddIcon />}
+                        sx={{ fontWeight: 'bold', color: '#003380', borderColor: '#003380', bgcolor: '#f8f9fb', '&:hover': { borderColor: '#ffcc00', color: '#ffcc00' } }}
                       >
                         Choose File
                       </Button>
-                      <Typography variant="body2" className="file-name">
+                      <Typography variant="body2" sx={{ mt: 1, color: '#888' }}>
                         {selectedFile ? selectedFile.name : 'No file chosen'}
                       </Typography>
-                    </div>
-                    
-                    {filePreview && (
-                      <div className="preview-container">
-                        <img 
-                          src={filePreview} 
-                          alt="Document preview" 
-                          className="document-preview" 
-                        />
-                      </div>
-                    )}
-                  </Grid>
-                </Grid>
+                      {filePreview && (
+                        <Box sx={{ mt: 2 }}>
+                          <img 
+                            src={filePreview} 
+                            alt="Document preview" 
+                            style={{ maxWidth: '100%', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}
+                          />
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
               </div>
             )}
             
             {formStep === 2 && (
               <div className="form-step">
-                <Typography variant="h6" className="form-section-title">Itinerary Details</Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12}>
+                <Typography variant="h6" className="form-section-title" sx={{ mb: 2 }}>Itinerary Details</Typography>
+                <Box>
+                  {/* Trip Name */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    <LocalOfferIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <TextField
-                      fullWidth
-                      label="Trip Name"
+                      variant="standard"
+                      placeholder="Trip Name"
                       name="tripName"
                       value={formData.tripName}
                       onChange={handleInputChange}
-                      variant="outlined"
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: { bgcolor: 'transparent', fontSize: 18, color: '#003380', fontWeight: 500 }
+                      }}
+                      fullWidth
                       required
                     />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
+                  </Box>
+                  {/* Start Date */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    <EventIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <TextField
-                      fullWidth
-                      label="Start Date"
+                      variant="standard"
+                      placeholder="Start Date"
                       name="startDate"
                       type="date"
                       value={formData.startDate}
                       onChange={handleInputChange}
-                      variant="outlined"
-                      required
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: { bgcolor: 'transparent', fontSize: 18, color: '#003380', fontWeight: 500 }
+                      }}
                       InputLabelProps={{ shrink: true }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
                       fullWidth
-                      label="End Date"
+                      required
+                    />
+                  </Box>
+                  {/* End Date */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
+                    <EventIcon sx={{ color: '#b0b0b0', mr: 2 }} />
+                    <TextField
+                      variant="standard"
+                      placeholder="End Date"
                       name="endDate"
                       type="date"
                       value={formData.endDate}
                       onChange={handleInputChange}
-                      variant="outlined"
-                      required
+                      InputProps={{
+                        disableUnderline: true,
+                        sx: { bgcolor: 'transparent', fontSize: 18, color: '#003380', fontWeight: 500 }
+                      }}
                       InputLabelProps={{ shrink: true }}
+                      fullWidth
+                      required
                     />
-                  </Grid>
-                  
-                  <Grid item xs={12}>
-                    <Typography variant="h6" className="itinerary-title">
+                  </Box>
+                  {/* Daily Itinerary */}
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="h6" className="itinerary-title" sx={{ mb: 2 }}>
                       Daily Itinerary
                     </Typography>
-                    
                     {formData.itineraryDays.map((dayData, index) => (
-                      <Paper key={index} className="itinerary-day-container" variant="outlined">
-                        <div className="itinerary-day-header">
-                          <Typography variant="subtitle1">Day {dayData.day}</Typography>
-                          {formData.itineraryDays.length > 1 && (
-                            <IconButton 
-                              size="small" 
-                              onClick={() => removeItineraryDay(index)}
-                              className="remove-day-button"
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          )}
-                        </div>
-                        <TextField
-                          fullWidth
-                          multiline
-                          rows={3}
-                          label={`Plan for Day ${dayData.day}`}
-                          value={dayData.plan}
-                          onChange={(e) => handleDayPlanChange(index, e.target.value)}
-                          variant="outlined"
-                          required
-                        />
+                      <Paper key={index} sx={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        p: 2,
+                        mb: 2,
+                        bgcolor: '#f0f6ff',
+                        borderRadius: 2,
+                        boxShadow: '0 2px 8px rgba(0,70,166,0.07)'
+                      }}>
+                        <Box sx={{ mr: 2, mt: 1 }}>
+                          <EditNoteIcon sx={{ color: '#b0b0b0' }} />
+                        </Box>
+                        <Box sx={{ flexGrow: 1 }}>
+                          <Typography variant="subtitle1" sx={{ mb: 1 }}>Day {dayData.day}</Typography>
+                          <TextField
+                            variant="standard"
+                            placeholder={`Plan for Day ${dayData.day}`}
+                            value={dayData.plan}
+                            onChange={(e) => handleDayPlanChange(index, e.target.value)}
+                            InputProps={{
+                              disableUnderline: true,
+                              sx: { bgcolor: 'transparent', fontSize: 16, color: '#003380', fontWeight: 500 }
+                            }}
+                            fullWidth
+                            multiline
+                            rows={2}
+                            required
+                          />
+                        </Box>
+                        {formData.itineraryDays.length > 1 && (
+                          <IconButton 
+                            size="small" 
+                            onClick={() => removeItineraryDay(index)}
+                            sx={{ ml: 2, mt: 1, color: '#ff3333' }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       </Paper>
                     ))}
-                    
                     <Button 
                       variant="outlined" 
                       startIcon={<AddIcon />}
                       onClick={addItineraryDay}
-                      className="add-day-button"
+                      sx={{ fontWeight: 'bold', color: '#003380', borderColor: '#003380', bgcolor: '#f8f9fb', '&:hover': { borderColor: '#ffcc00', color: '#ffcc00' } }}
                     >
                       Add Another Day
                     </Button>
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
               </div>
             )}
             
-            <div className="form-actions">
+            <div className="form-actions" style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
               <div>
                 {formStep > 0 && (
                   <Button 
@@ -792,11 +904,122 @@ function AdminDashboard() {
     );
   };
 
+  const handleRemoveTourist = (id) => {
+    // Implement tourist removal logic
+    console.log('Remove tourist with ID:', id);
+  };
+
+  const renderManageTouristsTab = () => (
+    <>
+      <div className="tab-header">
+        <Typography variant="h5" component="h2">Manage Tourists</Typography>
+        <Typography variant="subtitle1" color="textSecondary">
+          View, search, and manage registered tourists.
+        </Typography>
+      </div>
+      <Paper className="manage-tourists-container" sx={{ p: 2 }}>
+        {tourists.length === 0 ? (
+          <Typography variant="body1" align="center" sx={{ my: 4 }}>
+            No tourists registered yet.
+          </Typography>
+        ) : (
+          <List>
+            {tourists.map(tourist => (
+              <ListItem
+                key={tourist.id}
+                secondaryAction={
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveTourist(tourist.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                }
+                sx={{ borderBottom: '1px solid #eee' }}
+              >
+                <ListItemIcon>
+                  <PersonOutlineIcon color={tourist.status === 'Active' ? 'primary' : 'disabled'} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#003380' }}>
+                      {tourist.name} ({tourist.nationality})
+                    </Typography>
+                  }
+                  secondary={
+                    <>
+                      <Typography variant="body2">
+                        <strong>Trip:</strong> {tourist.tripName}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Dates:</strong> {tourist.startDate} to {tourist.endDate}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Phone:</strong> {tourist.phone}
+                      </Typography>
+                      <Chip
+                        label={tourist.status}
+                        color={tourist.status === 'Active' ? 'success' : 'default'}
+                        size="small"
+                        sx={{ mt: 0.5 }}
+                      />
+                    </>
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </Paper>
+    </>
+  );
+
+  // Settings tab content
+  const renderSettingsTab = () => (
+    <>
+      <div className="tab-header">
+        <Typography variant="h5" component="h2">Settings</Typography>
+        <Typography variant="subtitle1" color="textSecondary">
+          Manage your dashboard preferences and account settings.
+        </Typography>
+      </div>
+      <Paper className="settings-container" sx={{ p: 3, maxWidth: 500, mx: 'auto' }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Preferences</Typography>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel>Theme</InputLabel>
+          <Select defaultValue="light" label="Theme">
+            <MenuItem value="light">Light</MenuItem>
+            <MenuItem value="dark">Dark</MenuItem>
+            <MenuItem value="system">System Default</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel>Language</InputLabel>
+          <Select defaultValue="en" label="Language">
+            <MenuItem value="en">English</MenuItem>
+            <MenuItem value="hi">Hindi</MenuItem>
+          </Select>
+        </FormControl>
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="h6" sx={{ mb: 2 }}>Account</Typography>
+        <TextField
+          fullWidth
+          label="Change Password"
+          type="password"
+          variant="outlined"
+          sx={{ mb: 2 }}
+        />
+        <Button variant="contained" color="primary" sx={{ mb: 2 }}>
+          Save Changes
+        </Button>
+        <Button variant="outlined" color="error">
+          Logout
+        </Button>
+      </Paper>
+    </>
+  );
+
   return (
     <div className="admin-dashboard">
       {/* Success popup */}
       <SuccessPopup />
-      
       {/* Header */}
       <header className="admin-header">
         <div className="header-title">
@@ -876,19 +1099,17 @@ function AdminDashboard() {
           </div>
         </div>
       </header>
-
       <div className="admin-content">
         {/* Sidebar */}
         {renderSidebar()}
-
         {/* Main content */}
         <main className="admin-main">
           {activeTab === 'overview' && renderOverviewTab()}
           {activeTab === 'tourists' && renderRegistrationForm()}
-          {activeTab === 'manage' && renderPlaceholderTab('Manage Tourists')}
+          {activeTab === 'manage' && renderManageTouristsTab()}
           {activeTab === 'alerts' && renderPlaceholderTab('Emergency Alerts')}
           {activeTab === 'reports' && renderPlaceholderTab('Reports')}
-          {activeTab === 'settings' && renderPlaceholderTab('Settings')}
+          {activeTab === 'settings' && renderSettingsTab()}
         </main>
       </div>
     </div>
