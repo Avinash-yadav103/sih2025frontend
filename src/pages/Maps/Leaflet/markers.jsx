@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -46,8 +46,9 @@ const createCustomIcon = (type) => {
   });
 };
 
-const MarkersMap = ({ onMarkerClick, onMapReady }) => {
+const MarkersMap = ({ onMarkerClick, onMapReady, baseLayer = 'streets' }) => {
   const [mapInstance, setMapInstance] = useState(null);
+  const tileLayerRef = useRef();
   
   // Sample markers data - in a real app, this would come from an API
   const markers = [
@@ -103,6 +104,34 @@ const MarkersMap = ({ onMarkerClick, onMapReady }) => {
       onMapReady(mapInstance);
     }
   }, [mapInstance, onMapReady]);
+  
+  // Update tile layer when baseLayer changes
+  useEffect(() => {
+    if (tileLayerRef.current) {
+      const provider = getLayerProvider(baseLayer);
+      tileLayerRef.current.setUrl(provider.url);
+    }
+  }, [baseLayer]);
+  
+  // Get the appropriate layer provider based on selected baseLayer
+  const getLayerProvider = (layer) => {
+    switch (layer) {
+      case 'satellite':
+        return osm.satellite;
+      case 'terrain':
+        return osm.terrain;
+      case 'dark':
+        return osm.dark;
+      case 'streets':
+      case 'maptiler':
+        // Use OSM instead of MapTiler to avoid the "Invalid key" error
+        return osm.osm;
+      default:
+        return osm.osm; // Change default from maptiler to osm
+    }
+  };
+  
+  const initialProvider = getLayerProvider(baseLayer);
 
   return (
     <MapContainer
@@ -112,8 +141,9 @@ const MarkersMap = ({ onMarkerClick, onMapReady }) => {
       whenCreated={setMapInstance}
     >
       <TileLayer
-        url={osm.maptiler.url}
-        attribution={osm.maptiler.attribution}
+        url={initialProvider.url}
+        attribution={initialProvider.attribution}
+        ref={tileLayerRef}
       />
       
       {markers.map((marker) => (

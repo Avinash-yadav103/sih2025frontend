@@ -1,50 +1,47 @@
 import { useState, useEffect } from "react";
 
 const useGeoLocation = () => {
-  const [location, setLocation] = useState({
-    loaded: false,
-    coordinates: { lat: "", lng: "" },
-    error: null,
-  });
+  const [position, setPosition] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const onSuccess = (location) => {
-    setLocation({
-      loaded: true,
-      coordinates: {
-        lat: location.coords.latitude,
-        lng: location.coords.longitude,
-      },
-      error: null,
-    });
-  };
+  // Get current position
+  const getPosition = () => {
+    setLoading(true);
 
-  const onError = (error) => {
-    setLocation({
-      loaded: true,
-      coordinates: { lat: "", lng: "" },
-      error,
-    });
-  };
-
-  useEffect(() => {
-    if (!("geolocation" in navigator)) {
-      onError({
-        code: 0,
-        message: "Geolocation not supported",
-      });
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser");
+      setLoading(false);
       return;
     }
 
-    const geoOptions = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0,
-    };
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setPosition({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
+        setLoading(false);
+      },
+      (error) => {
+        setError(error.message);
+        setLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+      }
+    );
+  };
 
-    navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions);
+  // Get position on component mount
+  useEffect(() => {
+    getPosition();
   }, []);
 
-  return location;
+  return { position, error, loading, getPosition };
 };
 
 export default useGeoLocation;

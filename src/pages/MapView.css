@@ -134,50 +134,48 @@
 /* Floating Map Controls - Google Maps style */
 .floating-controls {
   position: absolute;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
+  right: 10px;
+  top: 120px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
+  z-index: 900;
 }
 
 .map-control-button {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
   background-color: white;
   border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  color: #5F6368;
+  padding: 0;
+  color: #666;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .map-control-button:hover {
-  background-color: #f1f3f4;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.map-control-button:active {
+  background-color: #e0e0e0;
+}
+
+.map-control-button:focus {
+  outline: none;
 }
 
 .map-control-group {
   display: flex;
   flex-direction: column;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  gap: 1px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
   overflow: hidden;
-}
-
-.map-control-group .map-control-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.map-control-group .map-control-button:not(:last-child) {
-  border-bottom: 1px solid #e8eaed;
 }
 
 /* Info Card - Google Maps place card style */
@@ -471,6 +469,12 @@
   .map-type-controls::-webkit-scrollbar {
     display: none;
   }
+  
+  .floating-controls {
+    right: 10px;
+    bottom: 60px;
+    top: auto;
+  }
 }
 
 /* Override leaflet map styles to look more like Google Maps */
@@ -504,4 +508,70 @@
   font-size: 11px !important;
   background-color: rgba(255, 255, 255, 0.8) !important;
   padding: 2px 8px !important;
+}
+
+/* Update floating map controls styling */
+
+.floating-controls {
+  position: absolute;
+  right: 10px;
+  top: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 900;
+}
+
+.map-control-button {
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #666;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.map-control-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.map-control-button:active {
+  background-color: #e0e0e0;
+}
+
+.map-control-button:focus {
+  outline: none;
+}
+
+.map-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Style the layer selection menu */
+.MuiMenuItem-root.Mui-selected {
+  background-color: rgba(0, 102, 204, 0.08) !important;
+}
+
+.MuiMenuItem-root.Mui-selected:hover {
+  background-color: rgba(0, 102, 204, 0.12) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .floating-controls {
+    right: 10px;
+    bottom: 60px;
+    top: auto;
+  }
 }
