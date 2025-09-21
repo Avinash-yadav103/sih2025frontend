@@ -3,6 +3,12 @@ import { Box, Typography, Container, Button, TextField, InputAdornment, Grid, Ca
 import { Link } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import emblemLogo from '../assets/react.svg'; // Replace with actual emblem logo
+import land1 from '../assets/images/land1.jpg';
+import land2 from '../assets/images/land2.jpg';
+import land3 from '../assets/images/land3.jpg';
+import infraImg from '../assets/images/infra.jpeg';
+import developImg from '../assets/images/develop.jpeg';
+import nerImg from '../assets/images/NER.jpeg';
 
 // Add CSS for marquee animation
 const marqueeStyle = {
@@ -168,7 +174,7 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="180"
-                image="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" // Kaziranga National Park, Assam
+                image={land1}
                 alt="Wildlife Sanctuaries"
                 sx={{ objectFit: 'cover' }}
               />
@@ -194,7 +200,7 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="180"
-                image="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80" // Arunachal Pradesh mountains
+                image={land2}
                 alt="Scenic Mountains"
                 sx={{ objectFit: 'cover' }}
               />
@@ -220,7 +226,7 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="180"
-                image="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80" // Nagaland festival
+                image={land3}
                 alt="Cultural Festivals"
                 sx={{ objectFit: 'cover' }}
               />
@@ -278,7 +284,7 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image="https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=800&q=80" // Umiam Lake, Shillong (NESIDS)
+                image={infraImg}
                 alt="NESIDS"
                 sx={{ objectFit: 'cover' }}
               />
@@ -301,7 +307,7 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80" // Gurudongmar Lake, Sikkim (NEIDS)
+                image={developImg}
                 alt="NEIDS"
                 sx={{ objectFit: 'cover' }}
               />
@@ -324,7 +330,7 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image="https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?auto=format&fit=crop&w=800&q=80" // Majuli Island, Assam (PMDP)
+                image={nerImg}
                 alt="PMDP"
                 sx={{ objectFit: 'cover' }}
               />

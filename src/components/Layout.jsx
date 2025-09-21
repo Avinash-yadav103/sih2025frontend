@@ -297,7 +297,7 @@ const Layout = () => {
                     Incidents
                   </NavLink>
                 </li>
-                <li>
+                {/* <li>
                   <NavLink to="/police/dispatch" className={({ isActive }) => isActive ? 'active' : ''}>
                     <LocalShippingIcon className="nav-icon" />
                     Dispatch
@@ -308,7 +308,7 @@ const Layout = () => {
                     <GroupsIcon className="nav-icon" />
                     Units
                   </NavLink>
-                </li>
+                </li> */}
                 <li>
                   <NavLink to="/police/geofences" className={({ isActive }) => isActive ? 'active' : ''}>
                     <LocationOnIcon className="nav-icon" />
