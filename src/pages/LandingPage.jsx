@@ -49,12 +49,24 @@ const LandingPage = () => {
       {/* Navigation */}
       <Box sx={{ bgcolor: '#003380', color: 'white', py: 2, px: 3, display: 'flex', justifyContent: 'space-between' }}>
         <Box>
-          <Button color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>Home</Button>
-          <Button color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>About Us</Button>
-          <Button color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>Tourism</Button>
-          <Button color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>Schemes</Button>
-          <Button color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>Gallery</Button>
-          <Button color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>Contact</Button>
+          <Button component={Link} to="/home" color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>
+            Home
+          </Button>
+          <Button component={Link} to="/about-us" color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>
+            About Us
+          </Button>
+          <Button component={Link} to="/tourism" color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>
+            Tourism
+          </Button>
+          <Button component={Link} to="/schemes" color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>
+            Schemes
+          </Button>
+          <Button component={Link} to="/gallery" color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>
+            Gallery
+          </Button>
+          <Button component={Link} to="/contact" color="inherit" sx={{ fontWeight: 'bold', mx: 1 }}>
+            Contact
+          </Button>
         </Box>
         <TextField
           size="small"
@@ -142,13 +154,13 @@ const LandingPage = () => {
 
         <Grid container spacing={3}>
           <Grid item xs={12} md={3}>
-            <Card sx={{ 
-              height: '100%', 
-              display: 'flex', 
+            <Card sx={{
+              height: '100%',
+              display: 'flex',
               flexDirection: 'column',
               boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
               transition: '0.3s',
-              '&:hover': { 
+              '&:hover': {
                 transform: 'translateY(-5px)',
                 boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
               }
@@ -156,22 +168,25 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="180"
-                image="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Rhinos_at_Kaziranga.jpg/1280px-Rhinos_at_Kaziranga.jpg"
+                image="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" // Kaziranga National Park, Assam
                 alt="Wildlife Sanctuaries"
+                sx={{ objectFit: 'cover' }}
               />
               <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>Wildlife Sanctuaries of Assam</Typography>
+                <Typography variant="h6" gutterBottom>
+                  🐅 Wildlife Sanctuaries of Assam
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ 
-              height: '100%', 
-              display: 'flex', 
+            <Card sx={{
+              height: '100%',
+              display: 'flex',
               flexDirection: 'column',
               boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
               transition: '0.3s',
-              '&:hover': { 
+              '&:hover': {
                 transform: 'translateY(-5px)',
                 boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
               }
@@ -179,22 +194,25 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="180"
-                image="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Tawang_Monastery_Arunachal_Pradesh.jpg/800px-Tawang_Monastery_Arunachal_Pradesh.jpg"
+                image="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80" // Arunachal Pradesh mountains
                 alt="Scenic Mountains"
+                sx={{ objectFit: 'cover' }}
               />
               <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>Scenic Mountains of Arunachal Pradesh</Typography>
+                <Typography variant="h6" gutterBottom>
+                  🏔️ Scenic Mountains of Arunachal Pradesh
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ 
-              height: '100%', 
-              display: 'flex', 
+            <Card sx={{
+              height: '100%',
+              display: 'flex',
               flexDirection: 'column',
               boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
               transition: '0.3s',
-              '&:hover': { 
+              '&:hover': {
                 transform: 'translateY(-5px)',
                 boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
               }
@@ -202,22 +220,25 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="180"
-                image="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/A_dance_from_hornbill_festival_kohima_nagaland.jpg/800px-A_dance_from_hornbill_festival_kohima_nagaland.jpg"
+                image="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80" // Nagaland festival
                 alt="Cultural Festivals"
+                sx={{ objectFit: 'cover' }}
               />
               <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>Cultural Festivals of Nagaland</Typography>
+                <Typography variant="h6" gutterBottom>
+                  🎉 Cultural Festivals of Nagaland
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ 
-              height: '100%', 
-              display: 'flex', 
+            <Card sx={{
+              height: '100%',
+              display: 'flex',
               flexDirection: 'column',
               boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
               transition: '0.3s',
-              '&:hover': { 
+              '&:hover': {
                 transform: 'translateY(-5px)',
                 boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
               }
@@ -225,11 +246,14 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="180"
-                image="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Living_Root_Bridge_of_Meghalaya.jpg/800px-Living_Root_Bridge_of_Meghalaya.jpg"
+                image="https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=800&q=80" // Living Root Bridge, Meghalaya
                 alt="Traditional Villages"
+                sx={{ objectFit: 'cover' }}
               />
               <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>Traditional Villages of Meghalaya</Typography>
+                <Typography variant="h6" gutterBottom>
+                  🏡 Traditional Villages of Meghalaya
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -254,8 +278,9 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Umiam_Lake_Shillong.jpg/800px-Umiam_Lake_Shillong.jpg"
+                image="https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=800&q=80" // Umiam Lake, Shillong (NESIDS)
                 alt="NESIDS"
+                sx={{ objectFit: 'cover' }}
               />
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h6" gutterBottom>North East Special Infrastructure Development Scheme</Typography>
@@ -276,8 +301,9 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Road_to_Gurudongmar_Lake_North_Sikkim_India_2012.jpg/800px-Road_to_Gurudongmar_Lake_North_Sikkim_India_2012.jpg"
+                image="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80" // Gurudongmar Lake, Sikkim (NEIDS)
                 alt="NEIDS"
+                sx={{ objectFit: 'cover' }}
               />
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h6" gutterBottom>North East Industrial Development Scheme</Typography>
@@ -298,8 +324,9 @@ const LandingPage = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Majuli_river_island.jpg/800px-Majuli_river_island.jpg"
+                image="https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?auto=format&fit=crop&w=800&q=80" // Majuli Island, Assam (PMDP)
                 alt="PMDP"
+                sx={{ objectFit: 'cover' }}
               />
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h6" gutterBottom>Prime Minister's Development Package for NER</Typography>

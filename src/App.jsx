@@ -19,6 +19,12 @@ import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import PoliceLogin from './pages/PoliceLogin';
 import AdminLogin from './pages/AdminLogin';
+import Home from './pages/Home';
+import AboutUs from './pages/AboutUs';
+import Tourism from './pages/Tourism';
+import Schemes from './pages/Schemes';
+import Gallery from './pages/Gallery';
+import Contact from './pages/Contact';
 import { DatabaseProvider } from './context/DatabaseContext';
 
 import './App.css';
@@ -34,6 +40,12 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/police/login" element={<PoliceLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/tourism" element={<Tourism />} />
+            <Route path="/schemes" element={<Schemes />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/contact" element={<Contact />} />
             
             {/* Admin routes */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
