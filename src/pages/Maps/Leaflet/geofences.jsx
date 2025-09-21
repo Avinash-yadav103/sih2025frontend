@@ -27,6 +27,33 @@ const geofenceTypes = [
   { value: "bonusArea", label: "Bonus Area", color: "#aa66cc" },
 ];
 
+// Helper function to get tile layer based on selected style
+const getTileLayerSource = (style = 'osm') => {
+  switch (style) {
+    case 'satellite':
+      return osm.satellite || {
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      };
+    case 'terrain':
+      return osm.terrain || {
+        url: 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png',
+        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      };
+    case 'dark':
+      return osm.dark || {
+        url: 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}{r}.png',
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+      };
+    case 'osm':
+    default:
+      return osm.osm || {
+        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+      };
+  }
+};
+
 // Component to handle map click events
 const LocationMarker = ({ setSelectedLocation }) => {
   useMapEvents({
@@ -41,7 +68,7 @@ const LocationMarker = ({ setSelectedLocation }) => {
   return null;
 };
 
-const GeofenceMap = () => {
+const GeofenceMap = ({ onMapReady }) => {
   const [center] = useState({ lat: 13.084622, lng: 80.248357 });
   const ZOOM_LEVEL = 9;
   const mapRef = useRef();
@@ -60,6 +87,7 @@ const GeofenceMap = () => {
     message: "",
     severity: "success"
   });
+  const [mapStyle, setMapStyle] = useState('osm'); // Add state for map style
   const fileInputRef = useRef(null);
   const { isConnected, error: dbError } = useDatabase();
   
@@ -120,6 +148,13 @@ const GeofenceMap = () => {
       }
     }
   }, [isConnected, dbError]);
+
+  // Pass map reference to parent when available
+  useEffect(() => {
+    if (mapRef.current && onMapReady) {
+      onMapReady(mapRef.current);
+    }
+  }, [mapRef, onMapReady]);
 
   // Save geofences to localStorage as backup
   useEffect(() => {
@@ -355,6 +390,14 @@ const GeofenceMap = () => {
       open: false
     });
   };
+  
+  // Map style selector - add these methods
+  const handleMapStyleChange = (style) => {
+    setMapStyle(style);
+  };
+
+  // Get the appropriate tile source
+  const tileSource = getTileLayerSource(mapStyle);
 
   return (
     <>
@@ -364,9 +407,10 @@ const GeofenceMap = () => {
         ref={mapRef}
         style={{ height: "100%", width: "100%" }}
       >
+        {/* FIXED: Use OpenStreetMap by default to avoid the MapTiler "Invalid key" error */}
         <TileLayer
-          url={osm.maptiler.url}
-          attribution={osm.maptiler.attribution}
+          url={tileSource.url}
+          attribution={tileSource.attribution}
         />
 
         {/* Map click handler */}
@@ -433,10 +477,54 @@ const GeofenceMap = () => {
         ))}
       </MapContainer>
 
+      {/* Map Style Controls */}
+      <div style={{ 
+        position: "absolute", 
+        top: "80px", 
+        right: "10px", 
+        zIndex: 1000,
+        display: "flex",
+        flexDirection: "column",
+        gap: "5px",
+        backgroundColor: "white",
+        padding: "5px",
+        borderRadius: "4px",
+        boxShadow: "0 1px 5px rgba(0,0,0,0.2)"
+      }}>
+        <Button 
+          variant={mapStyle === 'osm' ? "contained" : "outlined"} 
+          size="small"
+          onClick={() => handleMapStyleChange('osm')}
+        >
+          Standard
+        </Button>
+        <Button 
+          variant={mapStyle === 'satellite' ? "contained" : "outlined"} 
+          size="small"
+          onClick={() => handleMapStyleChange('satellite')}
+        >
+          Satellite
+        </Button>
+        <Button 
+          variant={mapStyle === 'terrain' ? "contained" : "outlined"} 
+          size="small"
+          onClick={() => handleMapStyleChange('terrain')}
+        >
+          Terrain
+        </Button>
+        <Button 
+          variant={mapStyle === 'dark' ? "contained" : "outlined"} 
+          size="small"
+          onClick={() => handleMapStyleChange('dark')}
+        >
+          Dark
+        </Button>
+      </div>
+
       {/* Controls for import/export functionality */}
       <div style={{ 
         position: "absolute", 
-        top: "180px", 
+        top: "260px", 
         right: "10px", 
         zIndex: 1000,
         display: "flex",

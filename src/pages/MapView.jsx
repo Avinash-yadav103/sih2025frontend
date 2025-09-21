@@ -69,7 +69,18 @@ function MapView() {
 
   // Set up map reference from child components
   const handleMapReference = (map) => {
+    console.log("Map reference received:", map);
     setMapRef(map)
+    
+    // Test if the map has the zoom methods
+    if (map) {
+      console.log("Zoom methods available:", {
+        zoomIn: typeof map.zoomIn === 'function',
+        zoomOut: typeof map.zoomOut === 'function',
+        setZoom: typeof map.setZoom === 'function',
+        getZoom: typeof map.getZoom === 'function'
+      })
+    }
   }
 
   // Close info card
@@ -80,14 +91,18 @@ function MapView() {
   // Handle zoom in
   const handleZoomIn = () => {
     if (mapRef) {
-      mapRef.zoomIn()
+      console.log("Zooming in", mapRef);
+      // Use the correct method for zooming in
+      mapRef.setZoom(mapRef.getZoom() + 1);
     }
   }
   
   // Handle zoom out
   const handleZoomOut = () => {
     if (mapRef) {
-      mapRef.zoomOut()
+      console.log("Zooming out", mapRef);
+      // Use the correct method for zooming out
+      mapRef.setZoom(mapRef.getZoom() - 1);
     }
   }
   
@@ -230,12 +245,20 @@ function MapView() {
       <div className="floating-controls">
         <div className="map-control-group">
           <Tooltip title="Zoom In" placement="left">
-            <button className="map-control-button" onClick={handleZoomIn} aria-label="Zoom in">
+            <button 
+              className="map-control-button" 
+              onClick={() => mapRef && mapRef.zoomIn(1)} 
+              aria-label="Zoom in"
+            >
               <ZoomInIcon />
             </button>
           </Tooltip>
           <Tooltip title="Zoom Out" placement="left">
-            <button className="map-control-button" onClick={handleZoomOut} aria-label="Zoom out">
+            <button 
+              className="map-control-button" 
+              onClick={() => mapRef && mapRef.zoomOut(1)} 
+              aria-label="Zoom out"
+            >
               <ZoomOutIcon />
             </button>
           </Tooltip>

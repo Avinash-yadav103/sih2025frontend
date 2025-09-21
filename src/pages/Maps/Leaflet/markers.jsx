@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import osm from './osm-providers';
@@ -46,8 +46,21 @@ const createCustomIcon = (type) => {
   });
 };
 
-const MarkersMap = ({ onMarkerClick, onMapReady, baseLayer = 'streets' }) => {
-  const [mapInstance, setMapInstance] = useState(null);
+// Create a MapController component to access the map instance
+function MapController({ onMapReady }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (map && onMapReady) {
+      console.log("Map reference available:", map);
+      onMapReady(map);
+    }
+  }, [map, onMapReady]);
+  
+  return null;
+}
+
+const MarkersMap = ({ onMarkerClick, onMapReady, baseLayer = 'osm' }) => {
   const tileLayerRef = useRef();
   
   // Sample markers data - in a real app, this would come from an API
@@ -98,13 +111,6 @@ const MarkersMap = ({ onMarkerClick, onMapReady, baseLayer = 'streets' }) => {
     }
   ];
 
-  // Pass map reference to parent when it's available
-  useEffect(() => {
-    if (mapInstance && onMapReady) {
-      onMapReady(mapInstance);
-    }
-  }, [mapInstance, onMapReady]);
-  
   // Update tile layer when baseLayer changes
   useEffect(() => {
     if (tileLayerRef.current) {
@@ -127,7 +133,7 @@ const MarkersMap = ({ onMarkerClick, onMapReady, baseLayer = 'streets' }) => {
         // Use OSM instead of MapTiler to avoid the "Invalid key" error
         return osm.osm;
       default:
-        return osm.osm; // Change default from maptiler to osm
+        return osm.osm;
     }
   };
   
@@ -138,8 +144,10 @@ const MarkersMap = ({ onMarkerClick, onMapReady, baseLayer = 'streets' }) => {
       center={[27.3389, 88.6138]}
       zoom={14}
       style={{ height: '100%', width: '100%' }}
-      whenCreated={setMapInstance}
     >
+      {/* This component will provide the map reference to parent */}
+      <MapController onMapReady={onMapReady} />
+      
       <TileLayer
         url={initialProvider.url}
         attribution={initialProvider.attribution}

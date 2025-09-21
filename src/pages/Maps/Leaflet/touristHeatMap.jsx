@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import 'leaflet/dist/leaflet.css';
@@ -7,25 +7,44 @@ import L from 'leaflet';
 import osm from './osm-providers';
 import TouristDataImporter from '../../../components/TouristDataImporter';
 
-// Initialize heatmap layer
-const HeatmapLayer = ({ points, radius = 25, blur = 15, maxZoom = 10 }) => {
+// Create a MapController component to access the map instance
+function MapController({ onMapReady }) {
   const map = useMap();
   
   useEffect(() => {
-    if (!points || points.length === 0) return;
+    if (map && onMapReady) {
+      console.log("Map reference available in heatmap:", map);
+      onMapReady(map);
+    }
+  }, [map, onMapReady]);
+  
+  return null;
+}
+
+// Initialize heatmap layer
+const HeatmapLayer = ({ points, radius = 25, blur = 15, maxZoom = 10 }) => {
+  const map = useMap();
+  const heatLayerRef = useRef(null);
+  
+  useEffect(() => {
+    if (!map) return;
+    
+    if (heatLayerRef.current) {
+      map.removeLayer(heatLayerRef.current);
+    }
     
     const heatData = points.map(point => [point.latitude, point.longitude, point.intensity || 1]);
-    const heatLayer = L.heatLayer(heatData, {
+    heatLayerRef.current = L.heatLayer(heatData, {
       radius,
       blur,
       maxZoom,
       gradient: {0.4: 'blue', 0.6: 'lime', 0.8: 'yellow', 1.0: 'red'}
-    });
-    
-    map.addLayer(heatLayer);
+    }).addTo(map);
     
     return () => {
-      map.removeLayer(heatLayer);
+      if (heatLayerRef.current) {
+        map.removeLayer(heatLayerRef.current);
+      }
     };
   }, [map, points, radius, blur, maxZoom]);
   
@@ -51,10 +70,11 @@ const missingTouristIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-const TouristHeatMap = () => {
+const TouristHeatMap = ({ onMapReady, baseLayer = 'osm' }) => {
   const [center] = useState({ lat: 13.0846, lng: 80.2483 }); // Chennai coordinates
   const [zoom] = useState(11);
   const [tourists, setTourists] = useState([]);
+  const tileLayerRef = useRef();
   
   // Function to handle data import from the TouristDataImporter component
   const handleTouristDataImport = (data) => {
@@ -78,6 +98,25 @@ const TouristHeatMap = () => {
     }
   };
   
+  // Get the appropriate layer provider based on selected baseLayer
+  const getLayerProvider = (layer) => {
+    switch (layer) {
+      case 'satellite':
+        return osm.satellite;
+      case 'terrain':
+        return osm.terrain;
+      case 'dark':
+        return osm.dark;
+      case 'streets':
+      case 'maptiler':
+        return osm.osm; // Use OSM instead of MapTiler
+      default:
+        return osm.osm;
+    }
+  };
+  
+  const initialProvider = getLayerProvider(baseLayer);
+
   return (
     <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '10px 20px' }}>
@@ -93,9 +132,13 @@ const TouristHeatMap = () => {
           zoom={zoom} 
           style={{ height: '100%', width: '100%' }}
         >
+          {/* This component will provide the map reference to parent */}
+          <MapController onMapReady={onMapReady} />
+          
           <TileLayer
-            url={osm.maptiler.url}
-            attribution={osm.maptiler.attribution}
+            url={initialProvider.url}
+            attribution={initialProvider.attribution}
+            ref={tileLayerRef}
           />
           
           {/* Heatmap Layer */}
