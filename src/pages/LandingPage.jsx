@@ -314,44 +314,221 @@ const LandingPage = () => {
       </Container>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: '#003380', color: 'white', mt: 6, py: 4 }}>
+      <Box
+        sx={{
+          bgcolor: '#002366',
+          color: '#fff',
+          mt: 6,
+          pt: 6,
+          pb: 2,
+          fontFamily: 'Roboto, Arial, sans-serif',
+        }}
+      >
         <Container maxWidth="lg">
           <Grid container spacing={4}>
             <Grid item xs={12} md={4}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Important Links</Typography>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: '#ffcc00' }}>
+                Important Links
+              </Typography>
               <Box component="ul" sx={{ listStyleType: 'none', pl: 0 }}>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Ministry of Tourism</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Ministry of DoNER</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Government of India</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Digital India</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>MyGov</Link></Box>
+                {[
+                  { label: 'Ministry of Tourism', url: 'https://tourism.gov.in/' },
+                  { label: 'Ministry of DoNER', url: 'https://mdoner.gov.in/' },
+                  { label: 'Government of India', url: 'https://india.gov.in/' },
+                  { label: 'Digital India', url: 'https://digitalindia.gov.in/' },
+                  { label: 'MyGov', url: 'https://www.mygov.in/' },
+                ].map(link => (
+                  <Box component="li" key={link.label} sx={{ mb: 1 }}>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener"
+                      style={{
+                        color: '#fff',
+                        textDecoration: 'none',
+                        fontWeight: 500,
+                        transition: 'color 0.2s',
+                      }}
+                      onMouseOver={e => (e.target.style.color = '#ffcc00')}
+                      onMouseOut={e => (e.target.style.color = '#fff')}
+                    >
+                      {link.label}
+                    </a>
+                  </Box>
+                ))}
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>North Eastern States</Typography>
-              <Box component="ul" sx={{ listStyleType: 'none', pl: 0 }}>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Arunachal Pradesh</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Assam</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Manipur</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Meghalaya</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Mizoram</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Nagaland</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Sikkim</Link></Box>
-                <Box component="li" sx={{ mb: 1 }}><Link href="#" sx={{ color: 'white', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Tripura</Link></Box>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: '#ffcc00' }}>
+                North Eastern States
+              </Typography>
+              <Box
+                component="ul"
+                sx={{
+                  listStyleType: 'none',
+                  pl: 0,
+                  columns: 2,
+                  columnGap: 4,
+                }}
+              >
+                {[
+                  "Arunachal Pradesh", "Assam", "Manipur", "Meghalaya",
+                  "Mizoram", "Nagaland", "Sikkim", "Tripura"
+                ].map(state => (
+                  <Box component="li" key={state} sx={{ mb: 1 }}>
+                    <a
+                      href={`#${state.replace(/\s+/g, '').toLowerCase()}`}
+                      style={{
+                        color: '#fff',
+                        textDecoration: 'none',
+                        fontWeight: 500,
+                        transition: 'color 0.2s',
+                      }}
+                      onMouseOver={e => (e.target.style.color = '#ffcc00')}
+                      onMouseOut={e => (e.target.style.color = '#fff')}
+                    >
+                      {state}
+                    </a>
+                  </Box>
+                ))}
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Contact Us</Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>Ministry of Tourism, North Eastern Region</Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>Government of India</Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>Email: info@netourism.gov.in</Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>Phone: +91-XXXXXXXXXX</Typography>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: '#ffcc00' }}>
+                Contact Us
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
+                  alt="Emblem"
+                  height="32px"
+                  style={{ marginRight: 8, filter: 'brightness(1.2)' }}
+                />
+                <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#fff' }}>
+                  Ministry of Tourism, North Eastern Region
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ mb: 1, color: '#fff' }}>
+                Government of India
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>Email:</strong>{' '}
+                <a
+                  href="mailto:info@netourism.gov.in"
+                  style={{
+                    color: '#ffcc00',
+                    textDecoration: 'none',
+                    fontWeight: 500,
+                  }}
+                >
+                  info@netourism.gov.in
+                </a>
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>Phone:</strong>{' '}
+                <a
+                  href="tel:+91-XXXXXXXXXX"
+                  style={{
+                    color: '#ffcc00',
+                    textDecoration: 'none',
+                    fontWeight: 500,
+                  }}
+                >
+                  +91-XXXXXXXXXX
+                </a>
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: '#ffcc00',
+                    color: '#002366',
+                    fontWeight: 'bold',
+                    boxShadow: 0,
+                    '&:hover': { bgcolor: '#e6b800' },
+                    borderRadius: '6px',
+                  }}
+                >
+                  Feedback / Suggestion
+                </Button>
+              </Box>
             </Grid>
           </Grid>
-          <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.2)', mt: 4, pt: 3, textAlign: 'center' }}>
-            <Typography variant="body2">
-              © {new Date().getFullYear()} | Content Owned by Ministry of Tourism, Government of India
-            </Typography>
+          <Box
+            sx={{
+              borderTop: '1px solid rgba(255,255,255,0.2)',
+              mt: 4,
+              pt: 3,
+              textAlign: 'center',
+              fontSize: '15px',
+              color: '#fff',
+              opacity: 0.95,
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 2,
+                flexWrap: 'wrap',
+                mb: 1,
+                fontWeight: 500,
+              }}
+            >
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                © {new Date().getFullYear()} | Content Owned by Ministry of Tourism, Government of India
+              </Typography>
+              <span style={{ fontSize: '18px', color: '#ffcc00' }}>•</span>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Last Updated: September 2025
+              </Typography>
+              <span style={{ fontSize: '18px', color: '#ffcc00' }}>•</span>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Designed & Developed by SIH2025 Team
+              </Typography>
+            </Box>
+            <Box sx={{ mt: 1 }}>
+              <Button
+                size="small"
+                sx={{
+                  color: '#ffcc00',
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  px: 2,
+                  '&:hover': { textDecoration: 'underline', bgcolor: 'transparent' },
+                }}
+              >
+                Accessibility Statement
+              </Button>
+              <Button
+                size="small"
+                sx={{
+                  color: '#ffcc00',
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  px: 2,
+                  '&:hover': { textDecoration: 'underline', bgcolor: 'transparent' },
+                }}
+              >
+                Privacy Policy
+              </Button>
+              <Button
+                size="small"
+                sx={{
+                  color: '#ffcc00',
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  px: 2,
+                  '&:hover': { textDecoration: 'underline', bgcolor: 'transparent' },
+                }}
+              >
+                Terms of Use
+              </Button>
+            </Box>
           </Box>
         </Container>
       </Box>
