@@ -896,7 +896,13 @@ function AdminDashboard() {
                       variant="outlined" 
                       startIcon={<AddIcon />}
                       onClick={addItineraryDay}
-                      sx={{ fontWeight: 'bold', color: '#003380', borderColor: '#003380', bgcolor: '#f8f9fb', '&:hover': { borderColor: '#ffcc00', color: '#ffcc00' } }}
+                      sx={{ 
+                        fontWeight: 'bold', 
+                        color: '#003380', 
+                        borderColor: '#003380', 
+                        bgcolor: '#f8f9fb', 
+                        '&:hover': { borderColor: '#ffcc00', color: '#ffcc00' } 
+                      }}
                     >
                       Add Another Day
                     </Button>
@@ -1402,46 +1408,7 @@ function AdminDashboard() {
         return (
           <Fade in={true} timeout={500}>
             <Box>
-              <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: '#1e293b' }}>
-                Register New Tourist
-              </Typography>
-              <ModernCard elevation="high">
-                <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                    Tourist Registration Form
-                  </Typography>
-                  <form onSubmit={handleSubmit}>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          label="Full Name"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          label="Email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </Grid>
-                    </Grid>
-                    <Box sx={{ mt: 4 }}>
-                      <GradientButton type="submit" variant="primary" size="large">
-                        Register Tourist
-                      </GradientButton>
-                    </Box>
-                  </form>
-                </CardContent>
-              </ModernCard>
+              {renderRegistrationForm()}
             </Box>
           </Fade>
         );
