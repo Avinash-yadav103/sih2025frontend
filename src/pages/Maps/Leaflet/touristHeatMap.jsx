@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polygon, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.heat";
@@ -36,6 +36,44 @@ const missingTouristIcon = new L.Icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41]
 });
+
+// --- added: predefined geofenced areas ---
+const predefinedGeofences = [
+  {
+    id: 'gf-1',
+    name: 'MG Road Zone',
+    type: 'polygon',
+    coordinates: [
+      [27.3415, 88.6110],
+      [27.3425, 88.6160],
+      [27.3380, 88.6170],
+      [27.3370, 88.6125],
+    ],
+    color: '#7C3AED',
+    fillColor: '#7C3AED22'
+  },
+  {
+    id: 'gf-2',
+    name: 'Town Park',
+    type: 'circle',
+    center: [27.3360, 88.6130],
+    radius: 300, // meters
+    color: '#3A7AFE',
+    fillColor: '#3A7AFE22'
+  },
+  {
+    id: 'gf-3',
+    name: 'Market Area',
+    type: 'polygon',
+    coordinates: [
+      [27.3400, 88.6090],
+      [27.3410, 88.6105],
+      [27.3390, 88.6115],
+    ],
+    color: '#ef4444',
+    fillColor: '#ef444422'
+  }
+];
 
 // Create a MapController component to access the map instance
 function MapController({ onMapReady }) {
@@ -132,7 +170,10 @@ const TouristHeatMap = ({ onMapReady, baseLayer = 'osm' }) => {
   const fileInputRef = useRef();
   const [showPreview, setShowPreview] = useState(false);
   const tileLayerRef = useRef();
-  
+  // show/hide geofences
+  const [showGeofences, setShowGeofences] = useState(true);
+  const toggleGeofences = () => setShowGeofences(v => !v);
+
   // Sample schema for validation
   const requiredFields = ['id', 'latitude', 'longitude'];
   
@@ -305,6 +346,37 @@ const TouristHeatMap = ({ onMapReady, baseLayer = 'osm' }) => {
   
   const initialProvider = getLayerProvider(baseLayer);
 
+  // Load sample data once from public/sample-data via the dev server (do not import)
+  useEffect(() => {
+    let cancelled = false;
+    const url = `${window.location.origin}/sample-data/northeast-india-tourists.json`;
+    fetch(url, { cache: 'no-store' })
+      .then(res => {
+        if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+        return res.json();
+      })
+      .then(jsonData => {
+        if (cancelled) return;
+        try {
+          validateData(jsonData);
+        } catch (validationErr) {
+          // still proceed if file exists but has minor issues
+          console.warn('Sample data validation warning:', validationErr.message);
+        }
+        const processed = (Array.isArray(jsonData) ? jsonData : []).map(t => ({
+          ...t,
+          intensity: t && (t.status === 'missing' ? 2 : t.status === 'overdue' ? 1.5 : t.intensity || 0.5)
+        }));
+        setTouristData(processed);
+        setPreviewData({ count: processed.length, samples: processed.slice(0, 5) });
+        if (processed.length) toast.info(`Loaded ${processed.length} sample records`);
+      })
+      .catch(err => {
+        console.warn('Could not load sample data from public/sample-data:', err);
+      });
+    return () => { cancelled = true; };
+  }, []);
+  
   return (
     <div className="tourist-heatmap-container" style={{ height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       <ToastContainer position="top-right" autoClose={3000} />
@@ -389,6 +461,20 @@ const TouristHeatMap = ({ onMapReady, baseLayer = 'osm' }) => {
                 Clear
               </button>
             )}
+            <button
+              onClick={toggleGeofences}
+              title={showGeofences ? 'Hide geofences' : 'Show geofences'}
+              style={{
+                padding: '8px 12px',
+                backgroundColor: showGeofences ? '#6f42c1' : '#e9ecef',
+                color: showGeofences ? 'white' : '#212529',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              {showGeofences ? 'Hide Geofences' : 'Show Geofences'}
+            </button>
           </div>
         </div>
 
@@ -550,6 +636,33 @@ const TouristHeatMap = ({ onMapReady, baseLayer = 'osm' }) => {
             ref={tileLayerRef}
           />
           
+          {/* Render predefined geofences (polygons and circles) */}
+          {showGeofences && predefinedGeofences.map(gf => {
+            if (gf.type === 'polygon') {
+              return (
+                <Polygon
+                  key={gf.id}
+                  positions={gf.coordinates}
+                  pathOptions={{ color: gf.color, fillColor: gf.fillColor, fillOpacity: 0.18 }}
+                >
+                </Polygon>
+              );
+            }
+
+            if (gf.type === 'circle') {
+              return (
+                <Circle
+                  key={gf.id}
+                  center={gf.center}
+                  radius={gf.radius}
+                  pathOptions={{ color: gf.color, fillColor: gf.fillColor, fillOpacity: 0.12 }}
+                />
+              );
+            }
+
+            return null;
+          })}
+          
           {touristData.length > 0 && (
             <>
               <HeatMapLayer points={touristData} />
@@ -610,6 +723,16 @@ const TouristHeatMap = ({ onMapReady, baseLayer = 'osm' }) => {
                 style={{ width: '12px', height: '20px' }}
               />
               <span style={{ fontSize: '12px' }}>Missing Tourist</span>
+            </div>
+            {/* Geofence legend */}
+            <div style={{ marginTop: '8px', borderTop: '1px dashed #e6e6e6', paddingTop: '8px' }}>
+              <strong style={{ fontSize: '12px', display: 'block', marginBottom: '6px' }}>Geofences</strong>
+              {predefinedGeofences.map(gf => (
+                <div key={gf.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <div style={{ width: '18px', height: '12px', background: gf.fillColor, border: `2px solid ${gf.color}`, borderRadius: '3px' }} />
+                  <span style={{ fontSize: '12px' }}>{gf.name}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
