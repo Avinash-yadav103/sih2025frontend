@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AdminDashboard.css';
-import { 
-  Grid, Card, CardContent, Typography, Paper, Tabs, Tab, Box, 
-  TextField, Button, Select, MenuItem, FormControl, InputLabel,
-  Stepper, Step, StepLabel, IconButton, Badge, Divider,
-  Avatar, CircularProgress, Chip, List, ListItem, ListItemText, ListItemIcon
+import {
+  Grid, Card, CardContent, Typography, Paper, Stepper, Step, StepLabel,
+  IconButton, Badge, Divider, Avatar, CircularProgress, Chip, List, ListItem,
+  ListItemText, ListItemIcon, Container, Fade, Slide, Zoom, Tooltip, AppBar,
+  Toolbar, Select, MenuItem, FormControl, InputLabel, TextField, Button, Drawer, Box
 } from '@mui/material';
+import { styled, keyframes } from '@mui/material/styles';
 
 // Icons
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -32,26 +33,303 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import EventIcon from '@mui/icons-material/Event';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import SecurityIcon from '@mui/icons-material/Security';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+
+// Keyframes
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+`;
+
+const slideIn = keyframes`
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+`;
+
+const fadeInUp = keyframes`
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+`;
+
+const float = keyframes`
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+`;
+
+const shimmer = keyframes`
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+`;
+
+// Styled Components
+const ModernCard = styled(Card)(({ theme, variant = 'default', elevation = 'medium' }) => ({
+  background: variant === 'gradient'
+    ? 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)'
+    : variant === 'glass'
+      ? 'rgba(255, 255, 255, 0.25)'
+      : '#ffffff',
+  backdropFilter: variant === 'glass' ? 'blur(20px)' : 'none',
+  borderRadius: elevation === 'high' ? '20px' : '16px',
+  boxShadow: elevation === 'high'
+    ? '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)'
+    : '0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)',
+  border: variant === 'glass'
+    ? '1px solid rgba(255, 255, 255, 0.3)'
+    : '1px solid rgba(226, 232, 240, 0.8)',
+  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+  overflow: 'hidden',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
+    transition: 'left 0.5s',
+  },
+  '&:hover': {
+    transform: 'translateY(-8px) scale(1.02)',
+    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)',
+    '&::before': {
+      left: '100%',
+    }
+  },
+  '&.stat-card': {
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '4px',
+      background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4)',
+    },
+    '&.alert::after': {
+      background: 'linear-gradient(90deg, #ef4444, #f97316)',
+    },
+    '&.success::after': {
+      background: 'linear-gradient(90deg, #10b981, #059669)',
+    }
+  }
+}));
+
+const StyledPaper = styled(Paper)(({ theme, variant = 'default' }) => ({
+  background: variant === 'glass'
+    ? 'rgba(255, 255, 255, 0.9)'
+    : 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+  backdropFilter: variant === 'glass' ? 'blur(20px)' : 'none',
+  borderRadius: '20px',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.05)',
+  border: '1px solid rgba(226, 232, 240, 0.8)',
+  overflow: 'hidden',
+  transition: 'all 0.4s ease',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)',
+  },
+}));
+
+const GradientButton = styled(Button)(({ theme, variant = 'primary', size = 'medium' }) => ({
+  background: variant === 'primary'
+    ? 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)'
+    : variant === 'success'
+      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+      : variant === 'warning'
+        ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+        : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+  color: '#ffffff',
+  borderRadius: size === 'large' ? '16px' : '12px',
+  padding: size === 'large' ? '14px 32px' : size === 'small' ? '8px 16px' : '10px 24px',
+  fontWeight: 600,
+  textTransform: 'none',
+  letterSpacing: '0.5px',
+  boxShadow: '0 4px 16px rgba(59, 130, 246, 0.4)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
+    transition: 'left 0.6s',
+  },
+  '&:hover': {
+    transform: 'translateY(-3px) scale(1.02)',
+    boxShadow: '0 8px 25px rgba(59, 130, 246, 0.6)',
+    '&::before': {
+      left: '100%',
+    }
+  },
+  '&:active': {
+    transform: 'translateY(-1px) scale(0.98)',
+  }
+}));
+
+const ModernStepper = styled(Stepper)(({ theme }) => ({
+  '& .MuiStepLabel-root .Mui-completed': {
+    color: '#10b981',
+  },
+  '& .MuiStepLabel-root .Mui-active': {
+    color: '#3b82f6',
+  },
+  '& .MuiStepLabel-label': {
+    fontWeight: 600,
+  },
+  '& .MuiStepConnector-line': {
+    borderColor: '#e5e7eb',
+    borderTopWidth: 3,
+    borderRadius: '2px',
+  },
+  '& .MuiStepConnector-root.Mui-completed .MuiStepConnector-line': {
+    borderColor: '#10b981',
+  },
+  '& .MuiStepConnector-root.Mui-active .MuiStepConnector-line': {
+    borderColor: '#3b82f6',
+  },
+  '& .MuiStepIcon-root': {
+    fontSize: '2rem',
+    '&.Mui-completed': {
+      color: '#10b981',
+    },
+    '&.Mui-active': {
+      color: '#3b82f6',
+    }
+  }
+}));
+
+const IconContainer = styled(Box)(({ color = '#3b82f6', size = 'medium' }) => ({
+  width: size === 'large' ? '64px' : size === 'small' ? '48px' : '56px',
+  height: size === 'large' ? '64px' : size === 'small' ? '48px' : '56px',
+  borderRadius: '16px',
+  background: `linear-gradient(135deg, ${color}15 0%, ${color}08 100%)`,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: '16px',
+  border: `2px solid ${color}20`,
+  transition: 'all 0.3s ease',
+  animation: `${float} 6s ease-in-out infinite`,
+  animationDelay: `${Math.random() * 2}s`,
+  '&:hover': {
+    transform: 'scale(1.1)',
+    background: `linear-gradient(135deg, ${color}25 0%, ${color}15 100%)`,
+    border: `2px solid ${color}40`,
+  },
+  '& .MuiSvgIcon-root': {
+    color: color,
+    fontSize: size === 'large' ? '32px' : size === 'small' ? '24px' : '28px',
+    transition: 'all 0.3s ease',
+  },
+}));
+
+const HeaderContainer = styled(Box)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #0f172a 100%)',
+  borderRadius: '24px',
+  padding: '32px 40px',
+  marginBottom: '40px',
+  color: 'white',
+  boxShadow: '0 20px 60px rgba(30, 41, 59, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: '400px',
+    height: '100%',
+    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)',
+    borderRadius: '0 24px 24px 0',
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: '-50%',
+    right: '-50%',
+    width: '200px',
+    height: '200px',
+    background: 'radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%)',
+    borderRadius: '50%',
+    animation: `${float} 8s ease-in-out infinite`,
+  }
+}));
+
+const SearchContainer = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  background: 'rgba(255, 255, 255, 0.9)',
+  borderRadius: '16px',
+  padding: '8px 16px',
+  backdropFilter: 'blur(10px)',
+  border: '1px solid rgba(226, 232, 240, 0.8)',
+  transition: 'all 0.3s ease',
+  '&:hover, &:focus-within': {
+    background: 'rgba(255, 255, 255, 1)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+    transform: 'translateY(-2px)',
+  },
+  '& .MuiTextField-root': {
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        border: 'none',
+      },
+    },
+  },
+}));
+
+const NotificationDropdown = styled(Paper)(({ theme }) => ({
+  position: 'absolute',
+  top: '100%',
+  right: 0,
+  width: '380px',
+  maxHeight: '500px',
+  overflowY: 'auto',
+  background: 'rgba(255, 255, 255, 0.95)',
+  backdropFilter: 'blur(20px)',
+  borderRadius: '20px',
+  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.08)',
+  border: '1px solid rgba(226, 232, 240, 0.8)',
+  zIndex: 1300,
+  animation: `${fadeInUp} 0.3s ease-out`,
+}));
+
+const AnimatedChip = styled(Chip)(({ theme }) => ({
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.05)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+  }
+}));
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState({ name: "Admin User" });
   const [activeTab, setActiveTab] = useState('overview');
-  // Form state management
   const [formStep, setFormStep] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(""); // <-- Add this line
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState('');
   const [notificationCount, setNotificationCount] = useState(3);
-  
-  // Add popup state
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  
-  // Add notification dropdown state
   const [notificationOpen, setNotificationOpen] = useState(false);
   const notificationRef = useRef(null);
 
-  // Sample notifications data for admin
   const notifications = [
     {
       id: 1,
@@ -81,20 +359,16 @@ function AdminDashboard() {
       path: '/admin/settings'
     }
   ];
-  
+
   const [formData, setFormData] = useState({
-    // Personal details
     fullName: '',
     email: '',
     phone: '',
     nationality: '',
-    password: '',
-    // Document details
     idType: '',
     idNumber: '',
     kycId: '',
     emergencyContact: '',
-    // Itinerary details
     tripName: '',
     startDate: '',
     endDate: '',
@@ -103,7 +377,6 @@ function AdminDashboard() {
     ]
   });
 
-  // Sample tourist data for Manage Tourists section
   const [tourists, setTourists] = useState([
     {
       id: 'T001',
@@ -138,7 +411,6 @@ function AdminDashboard() {
   ]);
 
   useEffect(() => {
-    // Check if user is authenticated, redirect if not
     const authToken = localStorage.getItem('authToken');
     if (!authToken || authToken !== 'admin-token') {
       navigate('/admin/login');
@@ -146,30 +418,26 @@ function AdminDashboard() {
     }
   }, [navigate]);
 
-  // Auto-close popup after 3 seconds
   useEffect(() => {
     if (showSuccessPopup) {
       const timer = setTimeout(() => {
         setShowSuccessPopup(false);
       }, 3000);
-      
       return () => clearTimeout(timer);
     }
   }, [showSuccessPopup]);
-  
-  // Close notifications when clicking outside
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
         setNotificationOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [notificationRef]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
@@ -182,15 +450,11 @@ function AdminDashboard() {
 
   const handleNotificationClick = (path) => {
     setNotificationOpen(false);
-    // Navigate to the specific notification details
-    console.log(`Navigating to: ${path}`);
-    // Implement actual navigation if paths are valid
     // navigate(path);
   };
 
-  // Get notification icon based on type
   const getNotificationIcon = (type) => {
-    switch(type) {
+    switch (type) {
       case 'alert':
         return <ErrorOutlineIcon color="error" />;
       case 'tourist':
@@ -202,7 +466,6 @@ function AdminDashboard() {
     }
   };
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -211,13 +474,10 @@ function AdminDashboard() {
     });
   };
 
-  // Handle file selection
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      
-      // Create and set file preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setFilePreview(reader.result);
@@ -226,12 +486,10 @@ function AdminDashboard() {
     }
   };
 
-  // Trigger file input click
   const handleChooseFile = () => {
     fileInputRef.current.click();
   };
 
-  // Handle itinerary day changes
   const handleDayPlanChange = (index, value) => {
     const updatedDays = [...formData.itineraryDays];
     updatedDays[index].plan = value;
@@ -241,29 +499,24 @@ function AdminDashboard() {
     });
   };
 
-  // Add a new day to the itinerary
   const addItineraryDay = () => {
     const newDay = {
       day: formData.itineraryDays.length + 1,
       plan: ''
     };
-    
     setFormData({
       ...formData,
       itineraryDays: [...formData.itineraryDays, newDay]
     });
   };
 
-  // Remove a day from the itinerary
   const removeItineraryDay = (index) => {
     if (formData.itineraryDays.length > 1) {
       const updatedDays = formData.itineraryDays.filter((_, i) => i !== index);
-      // Update day numbers
       const renumberedDays = updatedDays.map((day, i) => ({
         ...day,
         day: i + 1
       }));
-      
       setFormData({
         ...formData,
         itineraryDays: renumberedDays
@@ -271,40 +524,42 @@ function AdminDashboard() {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted with data:', formData);
-    
-    try {
-      // Reset form after submission
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        nationality: '',
-        password: '',
-        idType: '',
-        idNumber: '',
-        kycId: '',
-        emergencyContact: '',
-        tripName: '',
-        startDate: '',
-        endDate: '',
-        itineraryDays: [
-          { day: 1, plan: '' }
-        ]
-      });
-      setSelectedFile(null);
-      setFilePreview('');
-      setFormStep(0);
-      
-      // Show success popup
-      setShowSuccessPopup(true);
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Failed to register tourist. Please try again.');
-    }
+    // Add tourist to list (simulate backend)
+    setTourists([
+      ...tourists,
+      {
+        id: `T${tourists.length + 1}`,
+        name: formData.fullName,
+        nationality: formData.nationality,
+        phone: formData.phone,
+        tripName: formData.tripName,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        status: 'Active'
+      }
+    ]);
+    setFormData({
+      fullName: '',
+      email: '',
+      phone: '',
+      nationality: '',
+      idType: '',
+      idNumber: '',
+      kycId: '',
+      emergencyContact: '',
+      tripName: '',
+      startDate: '',
+      endDate: '',
+      itineraryDays: [
+        { day: 1, plan: '' }
+      ]
+    });
+    setSelectedFile(null);
+    setFilePreview('');
+    setFormStep(0);
+    setShowSuccessPopup(true);
   };
 
   const handleNext = () => {
@@ -315,176 +570,13 @@ function AdminDashboard() {
     setFormStep(formStep - 1);
   };
 
-  const renderSidebar = () => {
-    const menuItems = [
-      { id: 'overview', label: 'Overview', icon: <DashboardIcon /> },
-      { id: 'tourists', label: 'Register Tourist', icon: <PersonAddIcon /> },
-      { id: 'manage', label: 'Manage Tourists', icon: <PeopleIcon /> },
-      // Removed Emergency Alerts and Reports
-      { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
-    ];
-
-    return (
-      <div className="admin-sidebar">
-        <div className="sidebar-header">
-          <img 
-            src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" 
-            alt="Emblem" 
-            className="sidebar-logo" 
-          />
-          <Typography variant="h6">Tourism Admin</Typography>
-        </div>
-        <Divider />
-        <nav className="sidebar-nav">
-          {menuItems.map(item => (
-            <div
-              key={item.id}
-              className={`sidebar-item ${activeTab === item.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(item.id)}
-            >
-              <div className="sidebar-icon">{item.icon}</div>
-              <div className="sidebar-label">{item.label}</div>
-            </div>
-          ))}
-        </nav>
-      </div>
-    );
+  const handleRemoveTourist = (id) => {
+    setTourists(tourists.filter(t => t.id !== id));
   };
 
-  const renderOverviewTab = () => (
-    <>
-      <div className="tab-header">
-        <Typography variant="h5" component="h2">Dashboard Overview</Typography>
-        <Typography variant="subtitle1" color="textSecondary">
-          Welcome back, {user.name}. Here's your dashboard summary.
-        </Typography>
-      </div>
-      
-      <Grid container spacing={3} className="stats-container">
-        <Grid item xs={12} sm={6} md={3}>
-          <Card className="stat-card active">
-            <CardContent>
-              <Typography variant="h6" className="stat-title">Active Tourists</Typography>
-              <Typography variant="h3" className="stat-value">127</Typography>
-              <Typography variant="body2" className="stat-trend positive">
-                +12% from last week
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card className="stat-card">
-            <CardContent>
-              <Typography variant="h6" className="stat-title">Registered Today</Typography>
-              <Typography variant="h3" className="stat-value">24</Typography>
-              <Typography variant="body2" className="stat-trend positive">
-                +8% from yesterday
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card className="stat-card alert">
-            <CardContent>
-              <Typography variant="h6" className="stat-title">Emergency Alerts</Typography>
-              <Typography variant="h3" className="stat-value">3</Typography>
-              <Typography variant="body2" className="stat-trend negative">
-                2 new since yesterday
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card className="stat-card">
-            <CardContent>
-              <Typography variant="h6" className="stat-title">Total Registrations</Typography>
-              <Typography variant="h3" className="stat-value">1,453</Typography>
-              <Typography variant="body2" className="stat-trend positive">
-                +126 this month
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-      
-      <Grid container spacing={3} className="charts-container">
-        <Grid item xs={12} lg={8}>
-          <Paper className="chart-paper">
-            <Typography variant="h6">Tourist Registration Trends</Typography>
-            <div className="chart-container">
-              <div className="chart-placeholder">
-                <div className="chart-bars">
-                  {[30, 45, 35, 50, 60, 48, 72, 68, 55, 63, 75, 80].map((height, index) => (
-                    <div key={index} className="chart-bar" style={{ height: `${height}%` }}>
-                      <span className="bar-value">{Math.floor(height * 10)}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="chart-labels">
-                  {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, index) => (
-                    <div key={index} className="chart-label">{month}</div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} lg={4}>
-          <Paper className="chart-paper">
-            <Typography variant="h6">Tourist Demographics</Typography>
-            <div className="chart-container">
-              <div className="donut-chart">
-                <div className="donut-segment segment-1"></div>
-                <div className="donut-segment segment-2"></div>
-                <div className="donut-segment segment-3"></div>
-                <div className="donut-center"></div>
-              </div>
-              <div className="chart-legend">
-                <div className="legend-item">
-                  <div className="legend-color color-1"></div>
-                  <Typography variant="body2">Domestic (58%)</Typography>
-                </div>
-                <div className="legend-item">
-                  <div className="legend-color color-2"></div>
-                  <Typography variant="body2">Foreign (32%)</Typography>
-                </div>
-                <div className="legend-item">
-                  <div className="legend-color color-3"></div>
-                  <Typography variant="body2">NRI (10%)</Typography>
-                </div>
-              </div>
-            </div>
-          </Paper>
-        </Grid>
-        <Grid item xs={12}>
-          <Paper className="recent-activities">
-            <Typography variant="h6">Recent Activities</Typography>
-            <div className="activity-list">
-              {[
-                { time: '10:45 AM', action: 'Tourist registration completed', user: 'John Smith', status: 'success' },
-                { time: '09:30 AM', action: 'Emergency alert resolved', user: 'Tourist ID #T-7842', status: 'warning' },
-                { time: '08:15 AM', action: 'New itinerary added', user: 'Sarah Wilson', status: 'info' },
-                { time: 'Yesterday', action: 'System maintenance completed', user: 'Admin', status: 'success' },
-              ].map((activity, index) => (
-                <div key={index} className={`activity-item ${activity.status}`}>
-                  <div className="activity-time">{activity.time}</div>
-                  <div className="activity-content">
-                    <Typography variant="body1">{activity.action}</Typography>
-                    <Typography variant="body2" color="textSecondary">{activity.user}</Typography>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Paper>
-        </Grid>
-      </Grid>
-    </>
-  );
-
+  // Registration Form with Steps
   const renderRegistrationForm = () => {
     const steps = ['Personal Details', 'Document Details', 'Itinerary'];
-
-    // Icon mapping for personal details
     const personalIcons = {
       fullName: <PersonOutlineIcon sx={{ color: '#b0b0b0', mr: 2 }} />,
       email: <LocalOfferIcon sx={{ color: '#b0b0b0', mr: 2 }} />,
@@ -501,7 +593,6 @@ function AdminDashboard() {
             Register a new tourist after completing physical KYC verification.
           </Typography>
         </div>
-        
         <Paper className="form-container" sx={{
           maxWidth: 700,
           mx: 'auto',
@@ -519,13 +610,11 @@ function AdminDashboard() {
               </Step>
             ))}
           </Stepper>
-          
           <form onSubmit={handleSubmit} className="registration-form">
             {formStep === 0 && (
               <div className="form-step">
                 <Typography variant="h6" className="form-section-title" sx={{ mb: 2 }}>Personal Details</Typography>
                 <Box>
-                  {/* Full Name */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     {personalIcons.fullName}
                     <TextField
@@ -542,7 +631,6 @@ function AdminDashboard() {
                       required
                     />
                   </Box>
-                  {/* Email */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     {personalIcons.email}
                     <TextField
@@ -560,7 +648,6 @@ function AdminDashboard() {
                       required
                     />
                   </Box>
-                  {/* Phone */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     {personalIcons.phone}
                     <TextField
@@ -577,7 +664,6 @@ function AdminDashboard() {
                       required
                     />
                   </Box>
-                  {/* Nationality */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     {personalIcons.nationality}
                     <FormControl variant="standard" fullWidth>
@@ -591,12 +677,11 @@ function AdminDashboard() {
                         required
                       >
                         <MenuItem value=""><em>Select Nationality</em></MenuItem>
-                        <MenuItem value="indian">Indian</MenuItem>
-                        <MenuItem value="foreigner">Foreigner</MenuItem>
+                        <MenuItem value="Indian">Indian</MenuItem>
+                        <MenuItem value="Foreigner">Foreigner</MenuItem>
                       </Select>
                     </FormControl>
                   </Box>
-                  {/* Emergency Contact */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                     {personalIcons.emergencyContact}
                     <TextField
@@ -616,12 +701,10 @@ function AdminDashboard() {
                 </Box>
               </div>
             )}
-            
             {formStep === 1 && (
               <div className="form-step">
                 <Typography variant="h6" className="form-section-title" sx={{ mb: 2 }}>Document Details</Typography>
                 <Box>
-                  {/* ID Type */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     <LocalOfferIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <FormControl variant="standard" fullWidth>
@@ -635,14 +718,13 @@ function AdminDashboard() {
                         required
                       >
                         <MenuItem value=""><em>Select ID Type</em></MenuItem>
-                        <MenuItem value="aadhar">Aadhar Card</MenuItem>
-                        <MenuItem value="passport">Passport</MenuItem>
-                        <MenuItem value="driving">Driving License</MenuItem>
-                        <MenuItem value="voter">Voter ID</MenuItem>
+                        <MenuItem value="Aadhar">Aadhar Card</MenuItem>
+                        <MenuItem value="Passport">Passport</MenuItem>
+                        <MenuItem value="Driving">Driving License</MenuItem>
+                        <MenuItem value="Voter">Voter ID</MenuItem>
                       </Select>
                     </FormControl>
                   </Box>
-                  {/* ID Number */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     <BusinessCenterIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <TextField
@@ -659,7 +741,6 @@ function AdminDashboard() {
                       required
                     />
                   </Box>
-                  {/* KYC ID */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     <EventIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <TextField
@@ -675,7 +756,6 @@ function AdminDashboard() {
                       fullWidth
                     />
                   </Box>
-                  {/* Document Upload */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2 }}>
                     <EditNoteIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <Box sx={{ flexGrow: 1 }}>
@@ -711,12 +791,10 @@ function AdminDashboard() {
                 </Box>
               </div>
             )}
-            
             {formStep === 2 && (
               <div className="form-step">
                 <Typography variant="h6" className="form-section-title" sx={{ mb: 2 }}>Itinerary Details</Typography>
                 <Box>
-                  {/* Trip Name */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     <LocalOfferIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <TextField
@@ -733,7 +811,6 @@ function AdminDashboard() {
                       required
                     />
                   </Box>
-                  {/* Start Date */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     <EventIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <TextField
@@ -752,7 +829,6 @@ function AdminDashboard() {
                       required
                     />
                   </Box>
-                  {/* End Date */}
                   <Box sx={{ display: 'flex', alignItems: 'center', py: 2, borderBottom: '1px solid #ececec' }}>
                     <EventIcon sx={{ color: '#b0b0b0', mr: 2 }} />
                     <TextField
@@ -771,7 +847,6 @@ function AdminDashboard() {
                       required
                     />
                   </Box>
-                  {/* Daily Itinerary */}
                   <Box sx={{ mt: 3 }}>
                     <Typography variant="h6" className="itinerary-title" sx={{ mb: 2 }}>
                       Daily Itinerary
@@ -829,7 +904,6 @@ function AdminDashboard() {
                 </Box>
               </div>
             )}
-            
             <div className="form-actions" style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
               <div>
                 {formStep > 0 && (
@@ -870,249 +944,650 @@ function AdminDashboard() {
     );
   };
 
-  const renderPlaceholderTab = (title) => (
-    <>
-      <div className="tab-header">
-        <Typography variant="h5" component="h2">{title}</Typography>
-        <Typography variant="subtitle1" color="textSecondary">
-          This section is under development.
-        </Typography>
-      </div>
-      <Paper className="placeholder-container">
-        <div className="placeholder-content">
-          <Typography variant="h6" align="center" color="textSecondary">
-            {title} features will be available soon
-          </Typography>
-          <CircularProgress className="placeholder-loader" />
-        </div>
-      </Paper>
-    </>
+  // --- UI Render Functions ---
+
+  const renderTopBar = () => (
+    <AppBar position="static" sx={{
+      background: 'rgba(255, 255, 255, 0.9)',
+      backdropFilter: 'blur(20px)',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+      border: '1px solid rgba(226, 232, 240, 0.8)',
+      borderRadius: '20px',
+      mb: 3
+    }}>
+      <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            sx={{
+              color: '#64748b',
+              '&:hover': {
+                background: 'rgba(59, 130, 246, 0.1)',
+                color: '#3b82f6'
+              }
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <SearchContainer>
+            <SearchIcon sx={{ color: '#64748b', mr: 1 }} />
+            <TextField
+              placeholder="Search tourists, locations, alerts..."
+              variant="outlined"
+              size="small"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{ minWidth: '300px' }}
+            />
+            <IconButton size="small" sx={{ ml: 1 }}>
+              <FilterListIcon sx={{ color: '#64748b' }} />
+            </IconButton>
+          </SearchContainer>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box ref={notificationRef} sx={{ position: 'relative' }}>
+            <Tooltip title="Notifications">
+              <IconButton
+                onClick={toggleNotifications}
+                sx={{
+                  color: '#64748b',
+                  '&:hover': {
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    color: '#3b82f6'
+                  }
+                }}
+              >
+                <Badge badgeContent={notificationCount} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+            {notificationOpen && (
+              <NotificationDropdown>
+                <Box sx={{ p: 3, borderBottom: '1px solid rgba(226, 232, 240, 0.8)' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                    Notifications
+                  </Typography>
+                </Box>
+                <List sx={{ py: 0 }}>
+                  {notifications.map((notif, index) => (
+                    <ListItem
+                      key={notif.id}
+                      onClick={() => handleNotificationClick(notif.path)}
+                      sx={{
+                        cursor: 'pointer',
+                        borderBottom: index < notifications.length - 1 ? '1px solid rgba(226, 232, 240, 0.5)' : 'none',
+                        '&:hover': {
+                          background: 'rgba(59, 130, 246, 0.05)',
+                        },
+                        opacity: notif.read ? 0.7 : 1
+                      }}
+                    >
+                      <ListItemIcon>
+                        {getNotificationIcon(notif.type)}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={notif.title}
+                        secondary={
+                          <>
+                            <Typography variant="body2" sx={{ color: '#64748b' }}>
+                              {notif.message}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#94a3b8', mt: 0.5 }}>
+                              {notif.time}
+                            </Typography>
+                          </>
+                        }
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </NotificationDropdown>
+            )}
+          </Box>
+          <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar
+              sx={{
+                width: 40,
+                height: 40,
+                background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                border: '2px solid rgba(59, 130, 246, 0.3)'
+              }}
+            >
+              {user.name.charAt(0)}
+            </Avatar>
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                {user.name}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#64748b' }}>
+                Administrator
+              </Typography>
+            </Box>
+            <Tooltip title="Logout">
+              <IconButton
+                onClick={handleLogout}
+                sx={{
+                  color: '#64748b',
+                  '&:hover': {
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    color: '#ef4444'
+                  }
+                }}
+              >
+                <LogoutIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 
-  // Success Popup Component
-  const SuccessPopup = () => {
-    if (!showSuccessPopup) return null;
-    
+  const renderSidebar = () => {
+    const menuItems = [
+      { id: 'overview', label: 'Overview', icon: <DashboardIcon />, color: '#3b82f6', description: 'Dashboard insights' },
+      { id: 'tourists', label: 'Register Tourist', icon: <PersonAddIcon />, color: '#10b981', description: 'New registrations' },
+      { id: 'manage', label: 'Manage Tourists', icon: <PeopleIcon />, color: '#f59e0b', description: 'Tourist management' },
+      { id: 'settings', label: 'Settings', icon: <SettingsIcon />, color: '#8b5cf6', description: 'System configuration' },
+    ];
     return (
-      <div className="success-popup-overlay">
-        <div className="success-popup">
-          <CheckCircleIcon className="success-icon" />
-          <Typography variant="h6">Success!</Typography>
-          <Typography variant="body1">Tourist registered successfully!</Typography>
-        </div>
-      </div>
+      <Drawer
+        variant="persistent"
+        anchor="left"
+        open={sidebarOpen}
+        sx={{
+          width: sidebarOpen ? 320 : 0,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: 320,
+            boxSizing: 'border-box',
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(20px)',
+            borderRight: '1px solid rgba(226, 232, 240, 0.8)',
+            borderRadius: '0 20px 20px 0',
+            boxShadow: '8px 0 32px rgba(0, 0, 0, 0.1)',
+          },
+        }}
+      >
+        <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            mb: 4,
+            pb: 3,
+            borderBottom: '2px solid rgba(226, 232, 240, 0.8)',
+            position: 'relative'
+          }}>
+            <Box sx={{
+              p: 1.5,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+              boxShadow: '0 8px 16px rgba(59, 130, 246, 0.3)'
+            }}>
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
+                alt="Emblem"
+                style={{ width: '32px', height: '32px', filter: 'brightness(0) invert(1)' }}
+              />
+            </Box>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: '#1e293b' }}>
+                Tourism Portal
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
+                Administrative Dashboard
+              </Typography>
+            </Box>
+          </Box>
+          <Box sx={{ flex: 1, overflow: 'auto' }}>
+            {menuItems.map((item, index) => (
+              <Zoom in={true} key={item.id} style={{ transitionDelay: `${index * 150}ms` }}>
+                <Box
+                  onClick={() => setActiveTab(item.id)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    p: 3,
+                    mb: 2,
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    background: activeTab === item.id
+                      ? `linear-gradient(135deg, ${item.color}15 0%, ${item.color}08 100%)`
+                      : 'transparent',
+                    border: activeTab === item.id
+                      ? `2px solid ${item.color}40`
+                      : '2px solid transparent',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: '-100%',
+                      width: '100%',
+                      height: '100%',
+                      background: `linear-gradient(90deg, transparent, ${item.color}20, transparent)`,
+                      transition: 'left 0.6s',
+                    },
+                    '&:hover': {
+                      background: `linear-gradient(135deg, ${item.color}20 0%, ${item.color}10 100%)`,
+                      transform: 'translateX(8px) scale(1.02)',
+                      boxShadow: `0 8px 24px ${item.color}30`,
+                      '&::before': {
+                        left: '100%',
+                      }
+                    }
+                  }}
+                >
+                  <Box sx={{
+                    color: activeTab === item.id ? item.color : '#64748b',
+                    transition: 'all 0.3s ease',
+                    transform: activeTab === item.id ? 'scale(1.1)' : 'scale(1)',
+                  }}>
+                    {item.icon}
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{
+                      fontWeight: activeTab === item.id ? 700 : 600,
+                      color: activeTab === item.id ? item.color : '#475569',
+                      transition: 'all 0.3s ease',
+                      fontSize: '16px'
+                    }}>
+                      {item.label}
+                    </Typography>
+                    <Typography sx={{
+                      fontSize: '12px',
+                      color: '#94a3b8',
+                      fontWeight: 500
+                    }}>
+                      {item.description}
+                    </Typography>
+                  </Box>
+                  {activeTab === item.id && (
+                    <Box sx={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: item.color,
+                      boxShadow: `0 0 12px ${item.color}`,
+                      animation: `${pulse} 2s infinite`
+                    }} />
+                  )}
+                </Box>
+              </Zoom>
+            ))}
+          </Box>
+          <Box sx={{
+            mt: 'auto',
+            p: 3,
+            borderRadius: '16px',
+            background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+            border: '1px solid rgba(226, 232, 240, 0.8)'
+          }}>
+            <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600, mb: 1 }}>
+              Quick Stats
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="caption" sx={{ color: '#94a3b8' }}>Active Users</Typography>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#3b82f6' }}>127</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="caption" sx={{ color: '#94a3b8' }}>Alerts</Typography>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: '#ef4444' }}>3</Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Drawer>
     );
   };
 
-  const handleRemoveTourist = (id) => {
-    // Implement tourist removal logic
-    console.log('Remove tourist with ID:', id);
+  // --- Content Tabs ---
+  const renderOverviewTab = () => (
+    <Fade in={true} timeout={600}>
+      <Box>
+        <HeaderContainer>
+          <Box sx={{ position: 'relative', zIndex: 1 }}>
+            <Typography variant="h3" sx={{
+              fontWeight: 800,
+              mb: 2,
+              background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
+              Tourism Command Center
+            </Typography>
+            <Typography sx={{
+              color: '#cbd5e1',
+              fontSize: '18px',
+              fontWeight: 500,
+              lineHeight: 1.6
+            }}>
+              Welcome back, <strong>{user.name}</strong>. Monitor, manage, and optimize tourist experiences across all regions.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+              <AnimatedChip
+                label="Real-time Monitoring"
+                sx={{
+                  bgcolor: 'rgba(16, 185, 129, 0.2)',
+                  color: '#10b981',
+                  fontWeight: 600
+                }}
+                icon={<CheckCircleIcon />}
+              />
+              <AnimatedChip
+                label="Emergency Ready"
+                sx={{
+                  bgcolor: 'rgba(59, 130, 246, 0.2)',
+                  color: '#3b82f6',
+                  fontWeight: 600
+                }}
+                icon={<SecurityIcon />}
+              />
+            </Box>
+          </Box>
+        </HeaderContainer>
+        <Grid container spacing={4} sx={{ mb: 5 }}>
+          {[
+            { title: 'Active Tourists', value: '127', change: '+12%', trend: 'up', period: 'from last week', color: '#3b82f6', icon: PeopleIcon, progress: 85 },
+            { title: 'Registered Today', value: '24', change: '+8%', trend: 'up', period: 'from yesterday', color: '#10b981', icon: PersonAddIcon, progress: 65 },
+            { title: 'Emergency Alerts', value: '3', change: '+2', trend: 'up', period: 'new since yesterday', color: '#ef4444', icon: WarningIcon, progress: 25 },
+            { title: 'Total Registrations', value: '1,453', change: '+126', trend: 'up', period: 'this month', color: '#8b5cf6', icon: AssessmentIcon, progress: 92 }
+          ].map((stat, index) => {
+            const IconComponent = stat.icon;
+            return (
+              <Grid item xs={12} sm={6} lg={3} key={index}>
+                <Slide in={true} direction="up" timeout={600 + index * 200}>
+                  <ModernCard
+                    variant="gradient"
+                    elevation="high"
+                    className={`stat-card ${stat.title === 'Emergency Alerts' ? 'alert' : stat.title === 'Registered Today' ? 'success' : ''}`}
+                  >
+                    <CardContent sx={{ p: 4 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <IconContainer color={stat.color} size="medium">
+                          <IconComponent />
+                        </IconContainer>
+                        <Box sx={{ textAlign: 'right' }}>
+                          <Typography sx={{
+                            color: '#64748b',
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
+                          }}>
+                            {stat.title}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Typography variant="h2" sx={{
+                        color: '#1e293b',
+                        fontWeight: 900,
+                        mb: 2,
+                        fontSize: '3rem',
+                        lineHeight: 1
+                      }}>
+                        {stat.value}
+                      </Typography>
+                      <Box sx={{ mb: 3 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography sx={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
+                            Progress
+                          </Typography>
+                          <Typography sx={{ fontSize: '12px', color: stat.color, fontWeight: 700 }}>
+                            {stat.progress}%
+                          </Typography>
+                        </Box>
+                        <Box sx={{
+                          width: '100%',
+                          height: '6px',
+                          bgcolor: '#f1f5f9',
+                          borderRadius: '3px',
+                          overflow: 'hidden'
+                        }}>
+                          <Box sx={{
+                            width: `${stat.progress}%`,
+                            height: '100%',
+                            background: `linear-gradient(90deg, ${stat.color} 0%, ${stat.color}80 100%)`,
+                            borderRadius: '3px',
+                            transition: 'width 1s ease-out',
+                            animation: `${shimmer} 2s infinite linear`
+                          }} />
+                        </Box>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <AnimatedChip
+                          icon={stat.trend === 'up' ? <TrendingUpIcon /> : <TrendingDownIcon />}
+                          label={stat.change}
+                          sx={{
+                            bgcolor: stat.trend === 'up' ? '#dcfce7' : '#fef2f2',
+                            color: stat.trend === 'up' ? '#166534' : '#991b1b',
+                            fontWeight: 800,
+                            fontSize: '11px',
+                            height: '28px',
+                          }}
+                          size="small"
+                        />
+                        <Typography sx={{
+                          color: '#64748b',
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          lineHeight: 1.2
+                        }}>
+                          {stat.period}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </ModernCard>
+                </Slide>
+              </Grid>
+            );
+          })}
+        </Grid>
+        {/* ... rest of overview tab ... */}
+      </Box>
+    </Fade>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return renderOverviewTab();
+      case 'tourists':
+        return (
+          <Fade in={true} timeout={500}>
+            <Box>
+              <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: '#1e293b' }}>
+                Register New Tourist
+              </Typography>
+              <ModernCard elevation="high">
+                <CardContent sx={{ p: 4 }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                    Tourist Registration Form
+                  </Typography>
+                  <form onSubmit={handleSubmit}>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Full Name"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </Grid>
+                    </Grid>
+                    <Box sx={{ mt: 4 }}>
+                      <GradientButton type="submit" variant="primary" size="large">
+                        Register Tourist
+                      </GradientButton>
+                    </Box>
+                  </form>
+                </CardContent>
+              </ModernCard>
+            </Box>
+          </Fade>
+        );
+      case 'manage':
+        return (
+          <Fade in={true} timeout={500}>
+            <Box>
+              <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: '#1e293b' }}>
+                Manage Tourists
+              </Typography>
+              <ModernCard elevation="high">
+                <CardContent sx={{ p: 4 }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                    Registered Tourists
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {tourists.map((tourist, index) => (
+                      <Box key={tourist.id} sx={{
+                        p: 3,
+                        borderRadius: '12px',
+                        border: '1px solid rgba(226, 232, 240, 0.8)',
+                        background: 'linear-gradient(135deg, #f9fafb 0%, #ffffff 100%)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)'
+                        }
+                      }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Box>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                              {tourist.name}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#64748b' }}>
+                              {tourist.nationality} • {tourist.phone}
+                            </Typography>
+                          </Box>
+                          <AnimatedChip
+                            label={tourist.status}
+                            sx={{
+                              bgcolor: tourist.status === 'Active' ? '#dcfce7' : '#f3f4f6',
+                              color: tourist.status === 'Active' ? '#166534' : '#6b7280',
+                              fontWeight: 700
+                            }}
+                          />
+                          <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveTourist(tourist.id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </ModernCard>
+            </Box>
+          </Fade>
+        );
+      case 'settings':
+        return (
+          <Fade in={true} timeout={500}>
+            <Box>
+              <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: '#1e293b' }}>
+                System Settings
+              </Typography>
+              <ModernCard elevation="high">
+                <CardContent sx={{ p: 4 }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                    Application Configuration
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: '#64748b' }}>
+                    System settings and configuration options will be displayed here.
+                  </Typography>
+                </CardContent>
+              </ModernCard>
+            </Box>
+          </Fade>
+        );
+      default:
+        return renderOverviewTab();
+    }
   };
 
-  const renderManageTouristsTab = () => (
-    <>
-      <div className="tab-header">
-        <Typography variant="h5" component="h2">Manage Tourists</Typography>
-        <Typography variant="subtitle1" color="textSecondary">
-          View, search, and manage registered tourists.
-        </Typography>
-      </div>
-      <Paper className="manage-tourists-container" sx={{ p: 2 }}>
-        {tourists.length === 0 ? (
-          <Typography variant="body1" align="center" sx={{ my: 4 }}>
-            No tourists registered yet.
-          </Typography>
-        ) : (
-          <List>
-            {tourists.map(tourist => (
-              <ListItem
-                key={tourist.id}
-                secondaryAction={
-                  <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveTourist(tourist.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                }
-                sx={{ borderBottom: '1px solid #eee' }}
-              >
-                <ListItemIcon>
-                  <PersonOutlineIcon color={tourist.status === 'Active' ? 'primary' : 'disabled'} />
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#003380' }}>
-                      {tourist.name} ({tourist.nationality})
-                    </Typography>
-                  }
-                  secondary={
-                    <>
-                      <Typography variant="body2">
-                        <strong>Trip:</strong> {tourist.tripName}
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Dates:</strong> {tourist.startDate} to {tourist.endDate}
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Phone:</strong> {tourist.phone}
-                      </Typography>
-                      <Chip
-                        label={tourist.status}
-                        color={tourist.status === 'Active' ? 'success' : 'default'}
-                        size="small"
-                        sx={{ mt: 0.5 }}
-                      />
-                    </>
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
-        )}
-      </Paper>
-    </>
-  );
-
-  // Settings tab content
-  const renderSettingsTab = () => (
-    <>
-      <div className="tab-header">
-        <Typography variant="h5" component="h2">Settings</Typography>
-        <Typography variant="subtitle1" color="textSecondary">
-          Manage your dashboard preferences and account settings.
-        </Typography>
-      </div>
-      <Paper className="settings-container" sx={{ p: 3, maxWidth: 500, mx: 'auto' }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Preferences</Typography>
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel>Theme</InputLabel>
-          <Select defaultValue="light" label="Theme">
-            <MenuItem value="light">Light</MenuItem>
-            <MenuItem value="dark">Dark</MenuItem>
-            <MenuItem value="system">System Default</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel>Language</InputLabel>
-          <Select defaultValue="en" label="Language">
-            <MenuItem value="en">English</MenuItem>
-            <MenuItem value="hi">Hindi</MenuItem>
-          </Select>
-        </FormControl>
-        <Divider sx={{ my: 2 }} />
-        <Typography variant="h6" sx={{ mb: 2 }}>Account</Typography>
-        <TextField
-          fullWidth
-          label="Change Password"
-          type="password"
-          variant="outlined"
-          sx={{ mb: 2 }}
-        />
-        <Button variant="contained" color="primary" sx={{ mb: 2 }}>
-          Save Changes
-        </Button>
-        <Button variant="outlined" color="error">
-          Logout
-        </Button>
-      </Paper>
-    </>
-  );
-
+  // --- Main Render ---
   return (
-    <div className="admin-dashboard">
-      {/* Success popup */}
-      <SuccessPopup />
-      {/* Header */}
-      <header className="admin-header">
-        <div className="header-title">
-          <Typography variant="h6">Tourism Administration System</Typography>
-        </div>
-        <div className="header-actions">
-          {/* Notification dropdown */}
-          <div className="notification-wrapper" ref={notificationRef}>
-            <IconButton 
-              className="notification-button"
-              onClick={toggleNotifications}
-            >
-              <Badge badgeContent={notificationCount} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            
-            {notificationOpen && (
-              <div className="notification-dropdown">
-                <div className="notification-header">
-                  <Typography variant="h6">Notifications</Typography>
-                  <Typography variant="caption">{notificationCount} unread</Typography>
-                </div>
-                <Divider />
-                <List className="notification-list">
-                  {notifications.length > 0 ? (
-                    notifications.map((notification) => (
-                      <ListItem 
-                        key={notification.id}
-                        className={`notification-item ${!notification.read ? 'unread' : ''}`}
-                        onClick={() => handleNotificationClick(notification.path)}
-                      >
-                        <ListItemIcon className="notification-icon">
-                          {getNotificationIcon(notification.type)}
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary={notification.title}
-                          secondary={notification.message}
-                          className="notification-text"
-                        />
-                        <Typography variant="caption" className="notification-time">
-                          {notification.time}
-                        </Typography>
-                      </ListItem>
-                    ))
-                  ) : (
-                    <ListItem className="no-notifications">
-                      <ListItemText primary="No new notifications" />
-                    </ListItem>
-                  )}
-                </List>
-                <Divider />
-                <div className="notification-footer">
-                  <Button 
-                    variant="text" 
-                    size="small" 
-                    onClick={() => setActiveTab('alerts')}
-                  >
-                    View All Alerts
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="user-profile">
-            <Avatar className="user-avatar">
-              <AccountCircleIcon />
-            </Avatar>
-            <div className="user-info">
-              <Typography variant="subtitle2">{user.name}</Typography>
-              <Typography variant="caption" color="textSecondary">Admin</Typography>
-            </div>
-            <IconButton size="small" onClick={handleLogout} className="logout-button">
-              <LogoutIcon fontSize="small" />
-            </IconButton>
-          </div>
-        </div>
-      </header>
-      <div className="admin-content">
-        {/* Sidebar */}
-        {renderSidebar()}
-        {/* Main content */}
-        <main className="admin-main">
-          {activeTab === 'overview' && renderOverviewTab()}
-          {activeTab === 'tourists' && renderRegistrationForm()}
-          {activeTab === 'manage' && renderManageTouristsTab()}
-          {activeTab === 'alerts' && renderPlaceholderTab('Emergency Alerts')}
-          {activeTab === 'reports' && renderPlaceholderTab('Reports')}
-          {activeTab === 'settings' && renderSettingsTab()}
-        </main>
-      </div>
-    </div>
+    <Box sx={{
+      display: 'flex',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%)',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 50%)',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }
+    }}>
+      {renderSidebar()}
+      <Box sx={{
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        marginLeft: sidebarOpen ? 0 : '-320px',
+        transition: 'margin-left 0.3s ease',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <Container maxWidth="xl" sx={{ py: 3, flex: 1 }}>
+          {renderTopBar()}
+          {renderContent()}
+        </Container>
+        {showSuccessPopup && (
+          <Box sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            bgcolor: 'rgba(0,0,0,0.2)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Box sx={{
+              bgcolor: '#fff',
+              borderRadius: 3,
+              boxShadow: 3,
+              p: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <CheckCircleIcon color="success" sx={{ fontSize: 48, mb: 2 }} />
+              <Typography variant="h6">Success!</Typography>
+              <Typography variant="body1">Tourist registered successfully!</Typography>
+            </Box>
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 }
 
